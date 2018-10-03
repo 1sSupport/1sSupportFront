@@ -64,13 +64,10 @@ def writeCohesionToJson(l1title, l1link, cohesion, index):
             }
     with open('./dumps/dump' + str(index) + '.txt', 'w', encoding='utf-8') as dump:
        json.dump(dummy, dump, ensure_ascii=False)
-            #, dump, ensure_ascii=False
 
 liList = soup.find_all(sectionAllUrl)
 level1links = []
 level1titles = []
-#level1cohesion = []
-
 for li in liList:
     pagesCounter = 0
     fetchedPagesCounter = 0
@@ -118,7 +115,6 @@ for index, level1link in enumerate(level1links):
                 level2links.append(a['href'])
     cohesion = {'titles': level2titles, 'links': level2links}
 
-    #for cohesion in level1cohesion:
     level2responses = []
     for level2link in cohesion['links']:
         try: 
@@ -134,13 +130,18 @@ for index, level1link in enumerate(level1links):
             json.dump(level2response.text, log, ensure_ascii=False)
     cohesion['responses'] = level2responses
 
-    #level1cohesion.append(cohesion)
     try:
         writeCohesionToJson(level1titles[index], level1link, cohesion, index)
     except TypeError as error:
         print(error)
         continue
 
-
-# soup = BeautifulSoup(response.text)
-# print(soup.contents)
+# {
+#     'title': string,
+#     'link': string,
+#     'contents': {
+#         'titles': string[],
+#         'links': string[],
+#         'responses': string[]
+#         }
+# }

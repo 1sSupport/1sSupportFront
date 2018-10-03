@@ -136,6 +136,7 @@ for index, level1link in enumerate(level1links):
         print(error)
         continue
 
+# SCHEMA
 # {
 #     'title': string,
 #     'link': string,

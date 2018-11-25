@@ -11,18 +11,18 @@ try:
     response = mainSession.post('https://1cfresh.com/a/openid/e1cib/oid2op?cmd=auth', 
         data = {
             'openid.auth.check':	'true',
-            'openid.auth.pwd':	'8e6dab32',
+            'openid.auth.pwd':	'7a31499e',
             'openid.auth.short':	'false',
             'openid.auth.user':	'54389-40',
             'openid.claimed_id':	'http://specs.openid.net/auth/2.0/identifier_select',
-            'openid.identity':	'http://specs.openid.net/auth/2.0/identifier_select',
+            'openid.identity':	'http: //specs.openid.net/auth/2.0/identifier_select',
             'openid.mode':	'checkid_immediate',
             'openid.ns':	'http://specs.openid.net/auth/2.0',
             'openid.realm':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh',
             'openid.return_to':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall'
         },
         cookies = {'BITRIX_SM_LOGIN': 'partweb',
-                'PHPSESSID': 'nj8a6hvnsupamoc1jkaohbotb6',
+                'PHPSESSID': '2p7sbg6o87jf7f3upo7jvdr925',
                 'SUBSCRIBE_PERIOD': '31.12.2018',
                 'USER_TYPE': ':1:2:20:21:25:203:801:',
                 'PARTWEB_LOGIN': '54389-40',
@@ -62,7 +62,7 @@ def writeCohesionToJson(l1title, l1link, cohesion, index):
                 'link': l1link,
                 'contents': cohesion
             }
-    with open('./dumps/dump' + str(index) + '.txt', 'w', encoding='utf-8') as dump:
+    with open('./dumps/dump' + str(index) + '.json', 'w', encoding='utf-8') as dump:
        json.dump(dummy, dump, ensure_ascii=False)
 
 liList = soup.find_all(sectionAllUrl)

@@ -1,25 +1,17 @@
 {
-  "name": "1ssupportfront",
+  "name": "parser",
   "version": "1.0.0",
   "description": "ifdef::env-github[]\r :tip-caption: :bulb:\r :note-caption: :information_source:\r :important-caption: :heavy_exclamation_mark:\r :caution-caption: :fire:\r :warning-caption: :warning:\r endif::[]",
-  "main": "server.1.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/1sSupport/1sSupportFront.git"
-  },
-  "author": "",
+  "author": "Ripachev Evgeny (kareni3)",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/1sSupport/1sSupportFront/issues"
-  },
-  "homepage": "https://github.com/1sSupport/1sSupportFront#readme",
   "dependencies": {
     "fs": "0.0.1-security",
-    "xmlhttprequest": "^1.8.0",
-    "xmlhttprequest-cookie": "^0.9.7"
+    "iconv": "^2.3.1",
+    "iconv-lite": "^0.4.24"
   }
 }

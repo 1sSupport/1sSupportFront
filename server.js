@@ -1,134 +1,133 @@
-var tress = require('tress');
-var request = require('request');
+const tress = require('tress');
+const request = require('request');
+const ic = require('iconv-lite');
 
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+// Взять из кукисов
+const PHPSESSID = '115uu334kk8b4lvqsub0r2qgf0'
+const ROOT_URL = 'https://its.1c.ru';
+const P = '7a31499e';
+const U = '54389-40';
 
-var URL = 'https://its.1c.ru';
-var results = [];
+// массив типа с полученными данными, еба
+let results = [];
+//Внимание русские символы пробелы и всяка чушь в формате unicode пожалуйста сюда..
+//Эта юрлка полетит на обработку парсером
 let urls = [
-    //'/db/content/accnds/src/ндс%201с%202012%20исправление%20покупки%20слпериод%20вычетанет.htm?_=1542292886',
+    '/db/content/accnds/src/%D0%BD%D0%B4%D1%81%201%D1%81%202012%20%D0%B8%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BA%D0%B8%20%D1%81%D0%BB%D0%BF%D0%B5%D1%80%D0%B8%D0%BE%D0%B4%20%D0%B2%D1%8B%D1%87%D0%B5%D1%82%D0%B0%D0%BD%D0%B5%D1%82.htm?_=1542292886',
+    '/db/content/pubvnedrset/src/copyright.html?_=1539695781',
+    '/db/content/ka22doc/src/%D0%B2%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5.htm?_=1542292893',
+    '/db/ka22doc#content:310:hdoc',
     '/db/content/marketingdoc/src/%D0%B2%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5.htm?_=1539857480',
-    //'/db/accnds#content:1299:hdoc',
-    //'/db/marketingdoc/content/4/hdoc?bus&1542293333=&event[name]=mode',
-    //'/db/accnds#content:1050:hdoc',
-    //'/db/content/accnds/src/ндс 1с 2012 организация учета бухгалтерский учет.htm?_=1542292886',
-    //'/db/content/declprib/src/нп%201с%20отчетность%20декларация_3_2018_10.htm?',
-    //'/db/declprib/content/15388/hdoc/',
+    '/db/accnds#content:1299:hdoc',
+    '/db/marketingdoc/content/4/hdoc?bus&1542293333=&event[name]=mode',
+    '/db/accnds#content:1050:hdoc',
+    '/db/declprib/content/15388/hdoc/',
 ]
 
+// записываем в куки PHPSESSID
+const j = request.jar();
+const cookie = request.cookie(`PHPSESSID=${PHPSESSID}`);
+j.setCookie(cookie, ROOT_URL);
 
-
-
-urls.forEach( (val) => {
-    
-    var response = request.post(
-        {
-            url: URL+val, 
-            multipart: [
-                {
-                  'content-type': 'application/json',
-                  'body': {
-                    "openid.auth.check":	true,
-                    "openid.auth.pwd":	"7a31499e",
-                    "openid.auth.short":	false,
-                    "openid.auth.user":	"54389-40",
-                    "openid.claimed_id":	"http://specs.openid.net/auth/2.0/identifier_select",
-                    "openid.identity":	"http: //specs.openid.net/auth/2.0/identifier_select",
-                    "openid.mode":	"checkid_immediate",
-                    "openid.ns":	"http://specs.openid.net/auth/2.0",
-                    "openid.realm":	"https://its.1c.ru/login/?action=afterlogin&provider=fresh",
-                    "openid.return_to":	"https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall"
-                    }
-                },
-              ],
-            form: {
-                data: {
-                    "openid.auth.check":	true,
-                    "openid.auth.pwd":	"7a31499e",
-                    "openid.auth.short":	false,
-                    "openid.auth.user":	"54389-40",
-                    "openid.claimed_id":	"http://specs.openid.net/auth/2.0/identifier_select",
-                    "openid.identity":	"http: //specs.openid.net/auth/2.0/identifier_select",
-                    "openid.mode":	"checkid_immediate",
-                    "openid.ns":	"http://specs.openid.net/auth/2.0",
-                    "openid.realm":	"https://its.1c.ru/login/?action=afterlogin&provider=fresh",
-                    "openid.return_to":	"https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall"
-                },
-                headers: {
-                    "Content-Type": "application/json",
-                    "cache-control": "no-cache",
-                    "Postman-Token": "e6cca931-fa59-46c6-b42a-78472283e524"
-                },
-                cookie: {
-                    'CSS_ITS':'1542292880',
-                    'JS_ITS':'1542292880',
-                    '_ga':'GA1.2.1863243792.1538765691',
-                    '_ym_uid':'153876569224832603',
-                     '_ym_d':'1538765692',
-                     'CSS_CORE':'1542292880',
-                     'CSS_MAIN':'1542292882',
-                     'JS_MAIN':'1542292881',
-                     'BITRIX_SM_LOGIN':'partweb',
-                     'JS_CORE':'1542899501',
-                     '_gid':'GA1.2.583497583.1543152961',
-                     '_ym_isad':'2',
-                     '_ym_visorc_38953945':'w',
-                     '_ym_visorc_39255945':'w',
-                     'SEARCH_GROUP':'law',
-                     'SEARCH_NEW':'0',
-                     'CLICKED_SEARCH':'9d3801b5d1a94b9addde3cae6a909f65_f6cdf7d5dfbcb432ca9182e70b82ada1',
-                     'BUSERR_200':'BUS_ERROR',
-                     'ITS_GRP':'0',
-                     'PHPSESSID':'jt377dgk8i6q13sma4o3d8d444',
-                     'PARTWEB_LOGIN':'54389-40',
-                     'SUBSCRIBE_PERIOD':'31.12.2018',
-                     'USER_TYPE':'%3A1%3A2%3A20%3A21%3A25%3A203%3A801%3A3000%3A'
-                },
-                crossDomain: true,
-                    }
-                } , function(err, response, body) {
-                           // console.log(err) // 200
-                            console.log(body) // 200
-                            console.log(response.statusCode) // 200
-                           // console.log(response.url) // 200
-                           // console.log(response.history) // 200 
-                           // console.log(response.text) // 200 response.text
-                          });
+// `tress` последовательно вызывает обработчик для каждой ссылки в очереди
+let q = tress(function(url, callback){
+    // вот наш волшебный request, который умеет в куки и гзип сжатие. 
+    // Хз пока как он себя поведет если будет парсить страницу без зжатия gqip. Не проверял.
+    request.post(
+    {
+        url: url, 
+        jar: j,
+        gzip: true,
+        encoding: 'binary',
+        headers: {
+            "Content-Type": "text/html; charset=Windows-1251",
+            "Content-Encoding": "gzip",
+            'transfer-encoding': 'chunked',
+          }
+          
+    } , (err, response, body) => {
+                    //console.log(body)
+                    //console.log(response.statusCode)
+                    if (err){
+                        // Ошибки надо по нормальному обработать. Пока это так.
+                        results.push('!!!! ' + err);
+                        throw err;
+                    } 
+                    // Декодируем в утф
+                    let title = ic.decode(Buffer(body, 'binary'), "win1251");
+                    // Хуярим в результаты. строку из статус кода и результата
+                    results.push(response.statusCode + ': ' + title);
+                    // вызываем callback в конце. О да, колбек. люблю его
+                    callback();
+    });
 });
-    
+
+// эта функция выполнится, когда в очереди закончатся ссылки
+// есть идея делать несколько очередей, чтоб не переполнять стек. И записывать кусками. пока в теории все.
+// записывает в json, никто не мешает сделать что хочется
+q.drain = function(){
+    require('fs').writeFileSync('./data.json', JSON.stringify(results, null, 4));
+}
+
+// а вот и очередь. Можно например таймаут юзать. 
+urls.forEach( (url) => {
+    q.push(ROOT_URL+url);
+});
 
 
 
 
-var data = JSON.stringify({
-    "openid.auth.check": true,
-    "openid.auth.pwd": "7a31499e",
-    "openid.auth.short": false,
-    "openid.auth.user": "54389-40",
-    "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
-    "openid.identity": "http: //specs.openid.net/auth/2.0/identifier_select",
-    "openid.mode": "checkid_immediate",
-    "openid.ns": "http://specs.openid.net/auth/2.0",
-    "openid.realm": "https://its.1c.ru/login/?action=afterlogin&provider=fresh",
-    "openid.return_to": "https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall"
-  });
-  
-  var xhr = new XMLHttpRequest();
-  xhr.withCredentials = true;
-  
-  xhr.addEventListener("readystatechange", function () {
-    if (this.readyState === 4) {
-     // console.log(this.responseText);
-     // console.log(this.status);
-    }
-  });
-  
-  xhr.open("POST", "https://its.1c.ru/db/content/marketingdoc/src/%D0%B2%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5.htm?_=1539857480");
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.setRequestHeader("cache-control", "no-cache");
-  xhr.setRequestHeader("Postman-Token", "6f5ee5c9-1105-41b0-9b0b-1961105545b5");
-  
-  xhr.send(data);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+// НЕ нужно дальше будет
+let cookiee = {
+    'CSS_ITS':'1542292880',
+    'JS_ITS':'1542292880',
+    '_ga':'GA1.2.1863243792.1538765691',
+    '_ym_uid':'153876569224832603',
+     '_ym_d':'1538765692',
+     'CSS_CORE':'1542292880',
+     'CSS_MAIN':'1542292882',
+     'JS_MAIN':'1542292881',
+     'BITRIX_SM_LOGIN':'partweb',
+     'JS_CORE':'1542899501',
+     '_gid':'GA1.2.583497583.1543152961',
+     '_ym_isad':'2',
+     '_ym_visorc_38953945':'w',
+     '_ym_visorc_39255945':'w',
+     'SEARCH_GROUP':'law',
+     'SEARCH_NEW':'0',
+     'CLICKED_SEARCH':'9d3801b5d1a94b9addde3cae6a909f65_f6cdf7d5dfbcb432ca9182e70b82ada1',
+     'BUSERR_200':'BUS_ERROR',
+     'ITS_GRP':'0',
+     'PHPSESSID':'jt377dgk8i6q13sma4o3d8d444',
+     'PARTWEB_LOGIN':'54389-40',
+     'SUBSCRIBE_PERIOD':'31.12.2018',
+     'USER_TYPE':'%3A1%3A2%3A20%3A21%3A25%3A203%3A801%3A3000%3A'
+}
+
+/* let ccc = [];
+
+request.cookie('key1=value1')
+for (key in cookiee) {
+    ccc.push(`request.cookie('${key}=${cookiee[key]}');`)
+  }
+
+  ccc.forEach((val) => {
+      console.log(val)
+  })
+
+ */

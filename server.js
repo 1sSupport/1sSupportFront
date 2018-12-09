@@ -4,7 +4,7 @@ const ic = require('iconv-lite');
 const JSSoup = require('jssoup').default;
 
 // Взять из кукисов
-const PHPSESSID = 'f84oafol085s4michvor1og454'
+const PHPSESSID = 'aih9pt1jggquphm0ohsbrvdf16'
 const ROOT_URL = 'https://its.1c.ru';
 const P = '7a31499e';
 const U = '54389-40';
@@ -23,11 +23,11 @@ const main = async () => {
                 jar: j,
                 encoding: 'binary',
             }, (err, response, body) => {
-                let title = ic.decode(Buffer(body, 'binary'), "win1251");
+                //let title = ic.decode(Buffer(body, 'binary'), "win1251");
                 console.log('mainResponse is ok.')
                 resolve({
                     response, 
-                    body: title,
+                    body: body,
                 })
             })
       });
@@ -46,12 +46,13 @@ const main = async () => {
     const level1links = []
     // сюда будем класть названия разделов
     const level1titles = []
-    
+    let ii= 0;
     for (const li of liList) {
         let level1link = ""
         let a = li.find('a')
         if (a.attrs && a.attrs.href) {
             if  (a.attrs.href.indexOf('http') === -1) {
+                if (a.attrs.href.indexOf('download') !== -1) continue
                 level1link = ROOT_URL + a.attrs.href
             }
             else {
@@ -59,8 +60,9 @@ const main = async () => {
                     a.attrs.href.indexOf('download') !== -1 || 
                     a.attrs.href.indexOf('1c') === -1 && 
                     a.attrs.href.indexOf('v8') === -1
-                    )
-                    continue
+                    ){
+                        continue
+                    }
                 if (a.attrs.href === 'https://its.1c.ru/db/pubunfreal')
                     break
                 level1link = a.attrs.href
@@ -96,10 +98,10 @@ const main = async () => {
                     console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
                                 `- Index ${index+1}/${level1links.length} fetched ${url} with ${response.statusCode}`)
                     
-                    const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                    //const title = ic.decode(Buffer(body, 'binary'), "win1251");
                     resolve({
                         response, 
-                        body: title,
+                        body: body,
                     })
                 });
             });
@@ -123,6 +125,7 @@ const main = async () => {
         const cohesion = []
         const level2links = []
         const level2titles = []
+        const level2codes = []
 
         for (const a of listLevel2) {
             if (a.attrs && a.attrs.href) {
@@ -133,6 +136,7 @@ const main = async () => {
                     level2titles.push(undefined)
                 }
                 if  (a.attrs.href.indexOf('http') === -1) {
+                    if (a.attrs.href.indexOf('download') !== -1) continue
                     level2links.push(ROOT_URL + a.attrs.href);
                 }
                 else {
@@ -174,15 +178,18 @@ const main = async () => {
                         resolve({
                             response, 
                             body: title,
+                            status: response.statusCode,
                         })
                     });
                 });
                 level2responses.push(level2response.body)
+                level2codes.push(level2response.status)
 
                 cohesion[index] = {};
-                cohesion[index].title = level2titles[index];
+                cohesion[index].title = ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251") ;
                 cohesion[index].link = level2links[index];
                 cohesion[index].content = level2response.body;
+                cohesion[index].status = level2response.status;
             }
             catch(error) {
                 console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
@@ -191,7 +198,7 @@ const main = async () => {
         }
         
         const results = {
-            'title': l1title,
+            'title': ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
             'link': url,
             'contents': cohesion
         }

@@ -9,27 +9,6 @@ const ROOT_URL = 'https://its.1c.ru';
 const P = '7a31499e';
 const U = '54389-40';
 
-/*
-const data = {
-    'openid.auth.check':	'true',
-    'openid.auth.pwd':	P,
-    'openid.auth.short':	'false',
-    'openid.auth.user':	U,
-    'openid.claimed_id':	'http://specs.openid.net/auth/2.0/identifier_select',
-    'openid.identity':	'http://specs.openid.net/auth/2.0/identifier_select',
-    'openid.mode':	'checkid_immediate',
-    'openid.ns':	'http://specs.openid.net/auth/2.0',
-    'openid.realm':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh',
-    'openid.return_to':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall'
-};
-const cookies = 
-    'BITRIX_SM_LOGIN=partweb;'+
-    'PHPSESSID='+PHPSESSID+';'+
-    'SUBSCRIBE_PERIOD=31.12.2018;'+
-    'USER_TYPE=:1:2:20:21:25:203:801:;'+
-    'PARTWEB_LOGIN='+U+';';
-*/
-
 const main = async () => {
     // записываем в куки PHPSESSID
     const j = request.jar();
@@ -61,7 +40,7 @@ const main = async () => {
             return false
         }
     })
-    console.log('liList.length =', liList.length)
+    console.log('# liList.length =', liList.length)
 
     // сюда будем класть ссылки на разделы
     const level1links = []
@@ -90,40 +69,47 @@ const main = async () => {
         level1titles.push(a.contents[0]._text)
         level1links.push(level1link)
     }
-    console.log('level1links.length =', level1links.length)
-    console.log('level1titles.length =', level1titles.length)
+    console.log('# level1links.length =', level1links.length)
+    console.log('# level1titles.length =', level1titles.length)
 
-    let title
     for (const [index, url] of level1links.entries()) {
-        const level1response = await new Promise(resolve => {
-            request.post(
-            {
-                url: url, 
-                jar: j,
-                gzip: true,
-                encoding: 'binary',
-                headers: {
-                    "Content-Type": "text/html; charset=Windows-1251",
-                    "Content-Encoding": "gzip",
-                    'transfer-encoding': 'chunked',
-                  }
-            } , (err, response, body) => {
-                if (err){
-                    console.log('\x1b[31mЭй ёпта! Чел, ERROR! %s\x1b[0m', e)
-                    return
-                } 
-                //выводим в консоль инфу со статусом
-                console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
-                            `Index ${index+1}/${level1links.length} fetched ${url} with ${response.statusCode}`)
-                title = ic.decode(Buffer(body, 'binary'), "win1251");
-                resolve({
-                    response, 
-                    body: title,
-                })
+        const l1title = level1titles[index];
+        try {
+            level1response = await new Promise((resolve, reject) => {
+                request.post(
+                {
+                    url: url, 
+                    jar: j,
+                    gzip: true,
+                    encoding: 'binary',
+                    headers: {
+                        "Content-Type": "text/html; charset=Windows-1251",
+                        "Content-Encoding": "gzip",
+                        'transfer-encoding': 'chunked',
+                      }
+                } , (err, response, body) => {
+                    if (err){
+                        reject(err)
+                        return
+                    } 
+                    //выводим в консоль инфу со статусом
+                    console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
+                                `- Index ${index+1}/${level1links.length} fetched ${url} with ${response.statusCode}`)
+                    
+                    const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                    resolve({
+                        response, 
+                        body: title,
+                    })
+                });
             });
-        });
+        }
+        catch(error) {
+            console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
+            continue
+        }
         const soup2 = new JSSoup(level1response.body);
-        // select нету в jssoup
+        // select нету в jssoup. Пробуем делать так, но я не уверен что это правильно...
         const listLevel2 = soup2.findAll('a').filter(obj => {
             if (obj.attrs && obj.attrs.class) {
                 return obj.attrs.class.search(/[(icon1)(icon2)(icon3)(icon4)(icon5)]/i) !== -1
@@ -133,8 +119,8 @@ const main = async () => {
             }
         })
         const pagesCounter = listLevel2.length
-        let fetchedPagesCounter = 0
-        console.log('listLevel2.length =', pagesCounter)
+        console.log('# listLevel2.length =', pagesCounter)
+        const cohesion = []
         const level2links = []
         const level2titles = []
 
@@ -153,15 +139,76 @@ const main = async () => {
                     if (a.attrs.href.indexOf('download') !== -1) continue
                     level2links.push(a.attrs.href);
                 }
+                //console.log(level2links[level2links.length-1])
+                //console.log(level2titles[level2titles.length-1])
             }
         }
+        //console.log('level2titles.length =', level2titles.length)
+        //console.log('level2links.length =', level2links.length)
+
+        const level2responses = []
+
+        for (const [index, url] of level2links.entries()) {
+            try {
+                const level2response = await new Promise((resolve, reject) => {
+                    request.post(
+                    {
+                        url: url, 
+                        jar: j,
+                        gzip: true,
+                        encoding: 'binary',
+                        headers: {
+                            "Content-Type": "text/html; charset=Windows-1251",
+                            "Content-Encoding": "gzip",
+                            'transfer-encoding': 'chunked',
+                          }
+                    } , (err, response, body) => {
+                        if (err){
+                            reject(err)
+                            return
+                        } 
+                        //выводим в консоль инфу со статусом
+                        console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
+                                    `-- Content ${index+1}/${level2links.length} fetched ${url} with ${response.statusCode}`)
+                        const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                        resolve({
+                            response, 
+                            body: title,
+                        })
+                    });
+                });
+                level2responses.push(level2response.body)
+
+                cohesion[index] = {};
+                cohesion[index].title = level2titles[index];
+                cohesion[index].link = level2links[index];
+                cohesion[index].content = level2response.body;
+            }
+            catch(error) {
+                console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
+                continue
+            }
+        }
+        
+        const results = {
+            'title': l1title,
+            'link': url,
+            'contents': cohesion
+        }
+        
+        require('fs').writeFileSync(`./dumps/data${index}.json`, JSON.stringify(results, null, 4));
     }
+}
+
+    main();
 
 
-
-
+    // всё
+    
+    // далее шлак, который может пригодится
+/*
     // `tress` последовательно вызывает обработчик для каждой ссылки в очереди
-    let q = tress(function(url, callback){
+    var q = tress(function(url, callback){
         // вот наш волшебный request, который умеет в куки и гзип сжатие. 
         // Хз пока как он себя поведет если будет парсить страницу без зжатия gqip. Не проверял.
         request.post(
@@ -182,13 +229,13 @@ const main = async () => {
             } 
             
             
-        /* 
+        
             // Декодируем в утф
             let title = ic.decode(Buffer(body, 'binary'), "win1251");
             // Хуярим в результаты. строку из статус кода и результата
             results.push(response.statusCode + ': ' + title);
             // вызываем callback в конце. О да, колбек. люблю его
-            */
+            
             callback();
         });
     });
@@ -197,13 +244,30 @@ const main = async () => {
         //require('fs').writeFileSync('./data.json', JSON.stringify(results, null, 4));
     }
     
-    /* level1links.forEach( (url) => {
+    level1links.forEach( (url) => {
         q.push(url);
-    }); */
+    }); 
 }
 
 
-
-
-
-main();
+*/
+/*
+const data = {
+    'openid.auth.check':	'true',
+    'openid.auth.pwd':	P,
+    'openid.auth.short':	'false',
+    'openid.auth.user':	U,
+    'openid.claimed_id':	'http://specs.openid.net/auth/2.0/identifier_select',
+    'openid.identity':	'http://specs.openid.net/auth/2.0/identifier_select',
+    'openid.mode':	'checkid_immediate',
+    'openid.ns':	'http://specs.openid.net/auth/2.0',
+    'openid.realm':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh',
+    'openid.return_to':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall'
+};
+const cookies = 
+    'BITRIX_SM_LOGIN=partweb;'+
+    'PHPSESSID='+PHPSESSID+';'+
+    'SUBSCRIBE_PERIOD=31.12.2018;'+
+    'USER_TYPE=:1:2:20:21:25:203:801:;'+
+    'PARTWEB_LOGIN='+U+';';
+*/

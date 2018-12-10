@@ -46,8 +46,7 @@ const main = async () => {
     const level1links = []
     // сюда будем класть названия разделов
     const level1titles = []
-    let ii= 0;
-    for (const li of liList) {
+    for (const [index, li] of liList.entries()) {
         let level1link = ""
         let a = li.find('a')
         if (a.attrs && a.attrs.href) {
@@ -68,6 +67,11 @@ const main = async () => {
                 level1link = a.attrs.href
             }
         }
+        var substrings = level1link.split('amp;');
+        level1link = ''
+        for (var i = 0; i < substrings.length; i++) {
+            level1link += substrings[i];
+        }
         level1titles.push(a.contents[0]._text)
         level1links.push(level1link)
     }
@@ -76,50 +80,94 @@ const main = async () => {
 
     for (const [index, url] of level1links.entries()) {
         const l1title = level1titles[index];
-        try {
-            level1response = await new Promise((resolve, reject) => {
-                request.post(
-                {
-                    url: url, 
-                    jar: j,
-                    gzip: true,
-                    encoding: 'binary',
-                    headers: {
-                        "Content-Type": "text/html; charset=Windows-1251",
-                        "Content-Encoding": "gzip",
-                        'transfer-encoding': 'chunked',
-                      }
-                } , (err, response, body) => {
-                    if (err){
-                        reject(err)
-                        return
-                    } 
-                    //выводим в консоль инфу со статусом
-                    console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
-                                `- Index ${index+1}/${level1links.length} fetched ${url} with ${response.statusCode}`)
-                    
-                    //const title = ic.decode(Buffer(body, 'binary'), "win1251");
-                    resolve({
-                        response, 
-                        body: body,
-                    })
+        let curURL = url;
+        let status;
+        let is302orFirstOne = true;
+        while (is302orFirstOne) {
+            try {
+                level1response = await new Promise((resolve, reject) => {
+                    request.post(
+                    {
+                        url: curURL, 
+                        jar: j,
+                        gzip: true,
+                        encoding: 'binary',
+                        headers: {
+                            "Content-Type": "text/html; charset=Windows-1251",
+                            "Content-Encoding": "gzip",
+                            'transfer-encoding': 'chunked',
+                          }
+                    } , (err, response, body) => {
+                        if (err){
+                            reject(err)
+                            return
+                        } 
+                        //выводим в консоль инфу со статусом
+                        console.log(
+                            response.statusCode === 200 
+                            ? '\x1b[32m%s\x1b[0m' 
+                            : (response.statusCode === 301 || response.statusCode === 302) 
+                            ? '\x1b[34m%s\x1b[0m'
+                            : '\x1b[33m%s\x1b[0m',
+                            `- Index ${index+1}/${level1links.length} fetched ${curURL} with ${response.statusCode}`
+                            )
+                        //const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                        let redirect
+                        if (
+                            (response.statusCode === 302 || response.statusCode === 301) &&
+                            response.headers && 
+                            response.headers["content-location"]
+                            ){
+                            redirect = response.headers["content-location"]
+                        }
+
+                        resolve({
+                            response, 
+                            body: body,
+                            status: response.statusCode,
+                            redirect: redirect,
+                        })
+                    });
                 });
-            });
-        }
-        catch(error) {
-            console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
-            continue
+                // вызывать пост с новым url
+                if ((level1response.status === 302 || 
+                    level1response.status === 301) &&
+                    level1response.redirect) {
+                    curURL = level1response.redirect;
+                    is302orFirstOne = true;
+                }
+                else {
+                    is302orFirstOne = false;
+                }
+            }
+            catch(error) {
+                console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
+                continue
+            }
+
         }
         const soup2 = new JSSoup(level1response.body);
-        // select нету в jssoup. Пробуем делать так, но я не уверен что это правильно...
-        const listLevel2 = soup2.findAll('a').filter(obj => {
+        status = level1response.status;
+        // нужно добавить еще селекторы Саня говорит
+        const listLevel2_1 = soup2.findAll('a').filter(obj => {
             if (obj.attrs && obj.attrs.class) {
-                return obj.attrs.class.search(/[(icon1)(icon2)(icon3)(icon4)(icon5)]/i) !== -1
+                return obj.attrs.class.search(/(icon1)|(icon2)|(icon3)|(icon4)|(icon5)/i) !== -1
             }
             else {
                 return false
             }
         })
+        const listLevel2_2 = soup2.findAll('A').filter(obj => {
+            if (obj.attrs && obj.attrs.class) {
+                return obj.attrs.class.search(/(icon1)|(icon2)|(icon3)|(icon4)|(icon5)/i) !== -1
+            }
+            else {
+                return false
+            }
+        })
+
+        const listLevel2 = [...listLevel2_1, ...listLevel2_2]
+
         const pagesCounter = listLevel2.length
         console.log('# listLevel2.length =', pagesCounter)
         const cohesion = []
@@ -143,18 +191,15 @@ const main = async () => {
                     if (a.attrs.href.indexOf('download') !== -1) continue
                     level2links.push(a.attrs.href);
                 }
-                //console.log(level2links[level2links.length-1])
-                //console.log(level2titles[level2titles.length-1])
             }
         }
-        //console.log('level2titles.length =', level2titles.length)
-        //console.log('level2links.length =', level2links.length)
 
         const level2responses = []
+        let level2response
 
         for (const [index, url] of level2links.entries()) {
             try {
-                const level2response = await new Promise((resolve, reject) => {
+                level2response = await new Promise((resolve, reject) => {
                     request.post(
                     {
                         url: url, 
@@ -174,10 +219,9 @@ const main = async () => {
                         //выводим в консоль инфу со статусом
                         console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
                                     `-- Content ${index+1}/${level2links.length} fetched ${url} with ${response.statusCode}`)
-                        const title = ic.decode(Buffer(body, 'binary'), "win1251");
                         resolve({
                             response, 
-                            body: title,
+                            body: body,
                             status: response.statusCode,
                         })
                     });
@@ -187,19 +231,98 @@ const main = async () => {
 
                 cohesion[index] = {};
                 cohesion[index].title = ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251") ;
-                cohesion[index].link = level2links[index];
-                cohesion[index].content = level2response.body;
+                cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
+                cohesion[index].content = ic.decode(Buffer('' + level2response.body, 'binary'), "win1251");
+                cohesion[index].versions = [];
                 cohesion[index].status = level2response.status;
             }
             catch(error) {
                 console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
                 continue
             }
+
+            // третий уровень для мужыков
+            const soup3 = new JSSoup(level2response.body);
+            const liList3 = soup3.findAll('li')
+            const level3titles = []
+            const level3links = []
+            const level3codes = []
+            const level3responses = []
+
+            for (const [ind, li] of liList3.entries()) {
+                let level3link = ""
+                let a = li.find('A')
+                if(!a) {
+                    a = li.find('a')
+                }
+                if (a && a.attrs && a.attrs.href &&
+                    (ROOT_URL + a.attrs.href)
+                        .indexOf(level2links[index]
+                        .split('.htm')[0] + '_') !== -1 
+                    ) {
+                    if (a.attrs.href.indexOf('download') !== -1) continue
+                    if  (a.attrs.href.indexOf('http') === -1) {
+                        level3link = ROOT_URL + a.attrs.href
+                    }
+                    else {
+                        level3link = a.attrs.href
+                    }
+                    level3titles.push(a.contents[0]._text)
+                    level3links.push(level3link)
+                }
+            }
+
+            for (const [ind, url] of level3links.entries()) {
+                try {
+                    level3response = await new Promise((resolve, reject) => {
+                        request.post(
+                        {
+                            url: url, 
+                            jar: j,
+                            gzip: true,
+                            encoding: 'binary',
+                            headers: {
+                                "Content-Type": "text/html; charset=Windows-1251",
+                                "Content-Encoding": "gzip",
+                                'transfer-encoding': 'chunked',
+                              }
+                        } , (err, response, body) => {
+                            if (err){
+                                reject(err)
+                                return
+                            } 
+                            //выводим в консоль инфу со статусом
+                            console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
+                                        `--- Content ${ind+1}/${level3links.length} fetched ${url} with ${response.statusCode}`)
+                            const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                            resolve({
+                                response, 
+                                body: title,
+                                status: response.statusCode,
+                            })
+                        });
+                    });
+                    level3responses.push(level3response.body)
+                    level3codes.push(level3response.status)
+
+                    cohesion[index].versions.push({
+                        title: ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                        link: ic.decode(Buffer('' + level3links[ind], 'binary'), "win1251"),
+                        content: level3response.body,
+                        status: level3response.status,
+                    })
+                }
+                catch(error) {
+                    console.log('\x1b[31m--- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
+                    continue
+                }
+            }
         }
         
         const results = {
             'title': ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
-            'link': url,
+            'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
+            'status': status,
             'contents': cohesion
         }
         

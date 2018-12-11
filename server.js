@@ -191,6 +191,19 @@ const main = async () => {
             }
           }
         })
+        let iframe = dom2.window.document.getElementsByTagName("IFRAME")[0];
+        if (iframe) {
+          let localDom = new JSDOM(iframe.contentDocument);
+          let specialIframeLinks = Array.from(localDom.window.document.querySelectorAll("p > a:not(.share)"))
+          .map(element => {
+            return {
+              contents: [{_text: element.innerHTML}],
+              attrs: {
+                href: element.attributes.href.value
+              }
+            }
+          })
+        }
 
 
         const listLevel2 = [...listLevel2_1, ...listLevel2_2, ...listLevel2_3]

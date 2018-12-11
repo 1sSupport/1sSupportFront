@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 // Взять из кукисов
-const PHPSESSID = 'u3jc43l12u658vrjs504losao4'
+const PHPSESSID = 'aih9pt1jggquphm0ohsbrvdf16'
 const ROOT_URL = 'https://its.1c.ru';
 const P = '7a31499e';
 const U = '54389-40';
@@ -44,20 +44,26 @@ const main = async () => {
     })
     console.log('# liList.length =', liList.length)
 
-    // const dom = new JSDOM(mainResponse.body);
-    // let liListTest = dom.window.document.querySelectorAll("li");
-    // liListTest = Array.from(liListTest).filter(obj => {
-    //   if (obj.id)
-    //     return obj.id.indexOf('section_all_url') !== -1
-    //   else {
-    //     return false
-    //   }
-    // });
-    // console.log('# liList.length =', liListTest.length)
     // сюда будем класть ссылки на разделы
-    const level1links = []
+    let level1links = []
     // сюда будем класть названия разделов
-    const level1titles = []
+    let level1titles = []
+    
+        // убрать
+    // уникальная херня. чтоб разделы не повторялись.
+    //let islevel1linkrepeateds = []
+    //let islevel1titlesrepeateds = []
+
+    let level2uniquefirstlink = new Set();
+
+    /*
+    * <link> : {
+    *   linkFirstMention: <firstlink>
+    *   data: <number>
+    * }
+    */
+    let repeatingLinks = {}
+
     for (const [index, li] of liList.entries()) {
         let level1link = ""
         let a = li.find('a')
@@ -89,6 +95,10 @@ const main = async () => {
     }
     console.log('# level1links.length =', level1links.length)
     console.log('# level1titles.length =', level1titles.length)
+
+    // убрать
+    //level1links.splice(0, 176);
+    //level1titles.splice(0, 176);
 
     for (const [index, url] of level1links.entries()) {
         const l1title = level1titles[index];
@@ -128,9 +138,11 @@ const main = async () => {
                         if (
                             (response.statusCode === 302 || response.statusCode === 301) &&
                             response.headers &&
-                            response.headers["content-location"]
+                            (response.headers["content-location"] || response.headers["location"])
                             ){
-                            redirect = response.headers["content-location"]
+                            redirect = (response.statusCode === 302 && response.headers["content-location"])
+                            ? response.headers["content-location"]
+                            : response.headers["location"]
                         }
 
                         resolve({
@@ -156,11 +168,17 @@ const main = async () => {
                 console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
                 continue
             }
-
         }
+        //убрать
+        //console.log( ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"));
+        //console.log(curURL);
+        //console.log(ic.decode(Buffer('' + url, 'binary'), "win1251"));
         const soup2 = new JSSoup(level1response.body);
         status = level1response.status;
-        // нужно добавить еще селекторы Саня говорит
+
+        // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
+        if(curURL.indexOf('https://its.1c.ru') === -1) status = "Э бля, это не https://its.1c.ru"
+        
         const listLevel2_1 = soup2.findAll('a').filter(obj => {
             if (obj.attrs && obj.attrs.class) {
                 return obj.attrs.class.search(/(icon1)|(icon2)|(icon3)|(icon4)|(icon5)/i) !== -1
@@ -214,6 +232,14 @@ const main = async () => {
         const level2links = []
         const level2titles = []
         const level2codes = []
+        let pageWithoutContents = ''
+
+        if (pagesCounter === 0) {
+            console.log("Документ записался в корень. Все ок.")
+            pageWithoutContents = ic.decode(Buffer('' + level1response.body, 'binary'), "win1251");
+        }
+        // убрать
+        //listLevel2.length = 0;
 
         for (const a of listLevel2) {
             if (a.attrs && a.attrs.href) {
@@ -237,6 +263,7 @@ const main = async () => {
         const level2responses = []
         let level2response
 
+        if(level2links[0] && !level2uniquefirstlink.has(level2links[0]))
         for (const [index, url] of level2links.entries()) {
             try {
                 level2response = await new Promise((resolve, reject) => {
@@ -266,8 +293,12 @@ const main = async () => {
                         })
                     });
                 });
+                let sta = level2response.status
+                
+                // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
+                if(url.indexOf('https://its.1c.ru') === -1) sta = "Э бля, это не https://its.1c.ru"
                 level2responses.push(level2response.body)
-                level2codes.push(level2response.status)
+                level2codes.push(sta)
 
                 cohesion[index] = {};
                 cohesion[index].title = ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251") ;
@@ -342,8 +373,12 @@ const main = async () => {
                             })
                         });
                     });
+                    let sta = level3response.status
+                    
+                    // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
+                    if(url.indexOf('https://its.1c.ru') === -1) sta = "Э бля, это не https://its.1c.ru"
                     level3responses.push(level3response.body)
-                    level3codes.push(level3response.status)
+                    level3codes.push(sta)
 
                     cohesion[index].versions.push({
                         title: ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
@@ -359,11 +394,29 @@ const main = async () => {
             }
         }
 
+        let repeatingLinks_ = {}
+        if(level2links[0] && level2uniquefirstlink.has(level2links[0]))
+            repeatingLinks_ = repeatingLinks[level2links[0]]
+
         const results = {
             'title': ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
             'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
             'status': status,
+            'pageWithoutContents': pageWithoutContents,
+            'repeated': level2uniquefirstlink.has(level2links[0]),
+            'repeatingLinks': repeatingLinks_,
             'contents': cohesion
+        }
+
+        // добавляем уникальную хуйню. has не трогать!
+        if(level2links[0] && !level2uniquefirstlink.has(level2links[0])) {
+            level2uniquefirstlink.add(level2links[0]);
+            let lnk = level2links[0];
+            repeatingLinks[lnk] = {
+                linkFirstMention: ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                titleFirstMention: ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                data: `./dumps/data${index}.json`
+            }
         }
 
         require('fs').writeFileSync(`./dumps/data${index}.json`, JSON.stringify(results, null, 4));

@@ -13,7 +13,9 @@
     "fs": "0.0.1-security",
     "iconv": "^2.3.1",
     "iconv-lite": "^0.4.24",
+    "jsdom": "^13.0.0",
     "jsoup": "^1.0.0",
-    "jssoup": "0.0.10"
+    "jssoup": "0.0.10",
+    "tress": "^1.1.4"
   }
 }

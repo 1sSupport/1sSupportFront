@@ -2,9 +2,11 @@ const tress = require('tress');
 const request = require('request');
 const ic = require('iconv-lite');
 const JSSoup = require('jssoup').default;
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 // Взять из кукисов
-const PHPSESSID = 'aih9pt1jggquphm0ohsbrvdf16'
+const PHPSESSID = 'u3jc43l12u658vrjs504losao4'
 const ROOT_URL = 'https://its.1c.ru';
 const P = '7a31499e';
 const U = '54389-40';
@@ -15,33 +17,43 @@ const main = async () => {
     const cookie = request.cookie(`PHPSESSID=${PHPSESSID}`);
     //const cookie = cookies;
     j.setCookie(cookie, ROOT_URL);
-    
+
     const mainResponse = await new Promise(resolve => {
         request.post(
             {
-                url: 'https://its.1c.ru/section/all', 
+                url: 'https://its.1c.ru/section/all',
                 jar: j,
                 encoding: 'binary',
             }, (err, response, body) => {
                 //let title = ic.decode(Buffer(body, 'binary'), "win1251");
                 console.log('mainResponse is ok.')
                 resolve({
-                    response, 
+                    response,
                     body: body,
                 })
             })
       });
-    
+
     const soup = new JSSoup(mainResponse.body);
     liList = soup.findAll('li').filter(obj => {
         if (obj.attrs && obj.attrs.id)
-            return obj.attrs.id.indexOf('section_all_url') !== -1
+              return obj.attrs.id.indexOf('section_all_url') !== -1
         else {
             return false
         }
     })
     console.log('# liList.length =', liList.length)
 
+    // const dom = new JSDOM(mainResponse.body);
+    // let liListTest = dom.window.document.querySelectorAll("li");
+    // liListTest = Array.from(liListTest).filter(obj => {
+    //   if (obj.id)
+    //     return obj.id.indexOf('section_all_url') !== -1
+    //   else {
+    //     return false
+    //   }
+    // });
+    // console.log('# liList.length =', liListTest.length)
     // сюда будем класть ссылки на разделы
     const level1links = []
     // сюда будем класть названия разделов
@@ -56,8 +68,8 @@ const main = async () => {
             }
             else {
                 if (
-                    a.attrs.href.indexOf('download') !== -1 || 
-                    a.attrs.href.indexOf('1c') === -1 && 
+                    a.attrs.href.indexOf('download') !== -1 ||
+                    a.attrs.href.indexOf('1c') === -1 &&
                     a.attrs.href.indexOf('v8') === -1
                     ){
                         continue
@@ -88,7 +100,7 @@ const main = async () => {
                 level1response = await new Promise((resolve, reject) => {
                     request.post(
                     {
-                        url: curURL, 
+                        url: curURL,
                         jar: j,
                         gzip: true,
                         encoding: 'binary',
@@ -101,12 +113,12 @@ const main = async () => {
                         if (err){
                             reject(err)
                             return
-                        } 
+                        }
                         //выводим в консоль инфу со статусом
                         console.log(
-                            response.statusCode === 200 
-                            ? '\x1b[32m%s\x1b[0m' 
-                            : (response.statusCode === 301 || response.statusCode === 302) 
+                            response.statusCode === 200
+                            ? '\x1b[32m%s\x1b[0m'
+                            : (response.statusCode === 301 || response.statusCode === 302)
                             ? '\x1b[34m%s\x1b[0m'
                             : '\x1b[33m%s\x1b[0m',
                             `- Index ${index+1}/${level1links.length} fetched ${curURL} with ${response.statusCode}`
@@ -115,14 +127,14 @@ const main = async () => {
                         let redirect
                         if (
                             (response.statusCode === 302 || response.statusCode === 301) &&
-                            response.headers && 
+                            response.headers &&
                             response.headers["content-location"]
                             ){
                             redirect = response.headers["content-location"]
                         }
 
                         resolve({
-                            response, 
+                            response,
                             body: body,
                             status: response.statusCode,
                             redirect: redirect,
@@ -130,7 +142,7 @@ const main = async () => {
                     });
                 });
                 // вызывать пост с новым url
-                if ((level1response.status === 302 || 
+                if ((level1response.status === 302 ||
                     level1response.status === 301) &&
                     level1response.redirect) {
                     curURL = level1response.redirect;
@@ -165,8 +177,23 @@ const main = async () => {
                 return false
             }
         })
+        const dom2 = new JSDOM(level1response.body);
+        // тут мы удаляем элементы а с иконами, чтобы они не продублировались в поиске по doc, потому что такое возможно
+        Array.from(dom2.window.document.querySelectorAll("a.icon1, a.icon2, a.icon3, a.icon4, a.icon5, A.icon1, A.icon2, A.icon3, A.icon4, A.icon5")).forEach(element => {element.remove()})
+        // по сути это обычный DOM селектор как для CSS
+        let listLevel2_3temp = dom2.window.document.querySelectorAll("li.doc > a");
+        //  имитируем структуру как у остальных массивов
+        let listLevel2_3  = Array.from(listLevel2_3temp).map(element => {
+          return {
+            contents: [{_text: element.innerHTML}],
+            attrs: {
+              href: element.attributes.href.value
+            }
+          }
+        })
 
-        const listLevel2 = [...listLevel2_1, ...listLevel2_2]
+
+        const listLevel2 = [...listLevel2_1, ...listLevel2_2, ...listLevel2_3]
 
         const pagesCounter = listLevel2.length
         console.log('# listLevel2.length =', pagesCounter)
@@ -202,7 +229,7 @@ const main = async () => {
                 level2response = await new Promise((resolve, reject) => {
                     request.post(
                     {
-                        url: url, 
+                        url: url,
                         jar: j,
                         gzip: true,
                         encoding: 'binary',
@@ -215,12 +242,12 @@ const main = async () => {
                         if (err){
                             reject(err)
                             return
-                        } 
+                        }
                         //выводим в консоль инфу со статусом
                         console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
                                     `-- Content ${index+1}/${level2links.length} fetched ${url} with ${response.statusCode}`)
                         resolve({
-                            response, 
+                            response,
                             body: body,
                             status: response.statusCode,
                         })
@@ -258,7 +285,7 @@ const main = async () => {
                 if (a && a.attrs && a.attrs.href &&
                     (ROOT_URL + a.attrs.href)
                         .indexOf(level2links[index]
-                        .split('.htm')[0] + '_') !== -1 
+                        .split('.htm')[0] + '_') !== -1
                     ) {
                     if (a.attrs.href.indexOf('download') !== -1) continue
                     if  (a.attrs.href.indexOf('http') === -1) {
@@ -277,7 +304,7 @@ const main = async () => {
                     level3response = await new Promise((resolve, reject) => {
                         request.post(
                         {
-                            url: url, 
+                            url: url,
                             jar: j,
                             gzip: true,
                             encoding: 'binary',
@@ -290,13 +317,13 @@ const main = async () => {
                             if (err){
                                 reject(err)
                                 return
-                            } 
+                            }
                             //выводим в консоль инфу со статусом
                             console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
                                         `--- Content ${ind+1}/${level3links.length} fetched ${url} with ${response.statusCode}`)
                             const title = ic.decode(Buffer(body, 'binary'), "win1251");
                             resolve({
-                                response, 
+                                response,
                                 body: title,
                                 status: response.statusCode,
                             })
@@ -318,14 +345,14 @@ const main = async () => {
                 }
             }
         }
-        
+
         const results = {
             'title': ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
             'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
             'status': status,
             'contents': cohesion
         }
-        
+
         require('fs').writeFileSync(`./dumps/data${index}.json`, JSON.stringify(results, null, 4));
     }
 }
@@ -334,16 +361,16 @@ const main = async () => {
 
 
     // всё
-    
+
     // далее шлак, который может пригодится
 /*
     // `tress` последовательно вызывает обработчик для каждой ссылки в очереди
     var q = tress(function(url, callback){
-        // вот наш волшебный request, который умеет в куки и гзип сжатие. 
+        // вот наш волшебный request, который умеет в куки и гзип сжатие.
         // Хз пока как он себя поведет если будет парсить страницу без зжатия gqip. Не проверял.
         request.post(
         {
-            url: url, 
+            url: url,
             jar: j,
             gzip: true,
             encoding: 'binary',
@@ -356,27 +383,27 @@ const main = async () => {
             if (err){
                 console.log('\x1b[31mЭй ёпта! Чел, ERROR! %s\x1b[0m', e)
                 return
-            } 
-            
-            
-        
+            }
+
+
+
             // Декодируем в утф
             let title = ic.decode(Buffer(body, 'binary'), "win1251");
             // Хуярим в результаты. строку из статус кода и результата
             results.push(response.statusCode + ': ' + title);
             // вызываем callback в конце. О да, колбек. люблю его
-            
+
             callback();
         });
     });
-    
+
     q.drain = function(){
         //require('fs').writeFileSync('./data.json', JSON.stringify(results, null, 4));
     }
-    
+
     level1links.forEach( (url) => {
         q.push(url);
-    }); 
+    });
 }
 
 
@@ -394,7 +421,7 @@ const data = {
     'openid.realm':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh',
     'openid.return_to':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall'
 };
-const cookies = 
+const cookies =
     'BITRIX_SM_LOGIN=partweb;'+
     'PHPSESSID='+PHPSESSID+';'+
     'SUBSCRIBE_PERIOD=31.12.2018;'+

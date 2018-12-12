@@ -1,19 +1,21 @@
 
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <v-app id='inspire'>
-    <modal-component/>
+    <Footer/>
+    <SearchInput/>
+    <SearchResult/>
     <router-view/>
-    </v-app>
   </div>
 </template>
 
 <script>
 import ModalComponent from './components/ModalComponent';
+import Footer from './components/Footer';
+import SearchInput from './components/SearchInput';
+import SearchResult from './components/SearchResult';
 export default {
   name: 'App',
-  components: { ModalComponent },
+  components: { Footer, SearchInput, SearchResult },
 };
 </script>
 
@@ -29,6 +31,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>

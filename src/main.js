@@ -16,7 +16,7 @@ new Vue({
   router,
   components: { App } ,
   template: '<App/>',
-  data: () => ({
-    dialog: false
-  })
+  methods: {
+    
+  }
 });

@@ -9,25 +9,23 @@
 </template>
 
 <script>
-import ModalComponent from './components/ModalComponent';
-import Footer from './components/Footer';
-import SearchInput from './components/SearchInput';
-import SearchResult from './components/SearchResult';
+import ModalComponent from "./components/ModalComponent";
+import Footer from "./components/Footer";
+import SearchInput from "./components/SearchInput";
+import SearchResult from "./components/SearchResult";
 export default {
-  name: 'App',
-  components: { Footer, SearchInput, SearchResult },
+  name: "App",
+  components: { Footer, SearchInput, SearchResult }
 };
 </script>
 
-<style src=>
-
+<style src='vuetify/dist/vuetify.min.css'>
 </style>
 
 <style>
-@import 'vuetify/dist/vuetify.min.css';
+/* @import "vuetify/dist/vuetify.min.css"; */
 #app {
-  
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

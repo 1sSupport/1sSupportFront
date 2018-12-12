@@ -13,7 +13,7 @@
 
               >
               </v-autocomplete>
-                <v-btn class='SearchBtn' color="#3f66b2">Search</v-btn>
+                <v-btn class='SearchBtn' color="#3f66b2"> <v-icon dark>search</v-icon></v-btn>
             </v-flex>
       </v-form>
 
@@ -34,6 +34,7 @@
     .SearchBtn{
         margin-top: -6%;
         margin-left: 40%;
-        background-color: blue;
+        color: white;
+        height: 47px;
     }
 </style>

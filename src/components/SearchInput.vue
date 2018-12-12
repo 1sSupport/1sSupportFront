@@ -27,7 +27,7 @@
     }
 
     .SearchHeadline {
-                width: 60%;
+        width: 60%;
         margin-top: 2%;
         margin-left: -8%;
     }

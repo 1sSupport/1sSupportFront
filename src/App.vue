@@ -19,13 +19,14 @@ export default {
 };
 </script>
 
-<style src='vuetify/dist/vuetify.min.css'>
+<style src=>
 
 </style>
 
-
 <style>
+@import 'vuetify/dist/vuetify.min.css';
 #app {
+  
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -1,40 +1,57 @@
 <template>
-      <v-form>
+  <v-container>
+    <v-layout>
+      <v-flex xs12>
+        <v-card flat tile>
+          <v-card-title primary-title>
+            <h1>Введите ключевые слова, описывающие проблему</h1>
+          </v-card-title>
 
-            <v-flex xs12>
-                <h1 class='SearchHeadline'> Введите ключевые слова, описывающие проблему</h1>
-           
-              <v-autocomplete class='v-model'
-                v-model="searchString"
-                :disabled="isUpdating"
-                solo
-                label="Search"
-                clearable
-
-              >
-              </v-autocomplete>
-                <v-btn class='SearchBtn' color="#3f66b2"> <v-icon dark>search</v-icon></v-btn>
-            </v-flex>
-      </v-form>
-
+          <v-card-actions>
+            <v-layout>
+              <v-flex xs8>
+                <v-text-field v-model="searchString" label="Search" solo clearable></v-text-field>
+              </v-flex>
+              <v-flex xs2>
+                <v-btn color="#3f66b2" style="height: 47px">
+                  <v-icon dark>search</v-icon>
+                </v-btn>
+              </v-flex>
+            </v-layout>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
-<style scoped>
-    .v-model {
-        width: 60%;
-        margin-left: 3%;
-        margin-top: 1%;
-    }
+<script>
+export default {
+  data() {
+    return {
+      searchString: ""
+    };
+  }
+};
+</script>
 
-    .SearchHeadline {
-        width: 60%;
-        margin-top: 2%;
-        margin-left: -8%;
-    }
-    .SearchBtn{
-        margin-top: -6%;
-        margin-left: 40%;
-        color: white;
-        height: 47px;
-    }
+
+<style scoped>
+/* .v-model {
+  width: 60%;
+  margin-left: 3%;
+  margin-top: 1%;
+} */
+
+/* .SearchHeadline {
+  width: 60%;
+  margin-top: 2%;
+  margin-left: -8%;
+} */
+/* .SearchBtn {
+  margin-top: -6%;
+  margin-left: 40%;
+  color: white;
+  height: 47px;
+} */
 </style>

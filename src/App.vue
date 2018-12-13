@@ -1,7 +1,7 @@
 
 <template>
   <div id="app">
-    <Footer/>
+    <Toolbar/>
     <SearchInput/>
     <SearchResult/>
     <router-view/>
@@ -10,12 +10,12 @@
 
 <script>
 import ModalComponent from "./components/ModalComponent";
-import Footer from "./components/Footer";
+import Toolbar from "./components/Toolbar";
 import SearchInput from "./components/SearchInput";
 import SearchResult from "./components/SearchResult";
 export default {
   name: "App",
-  components: { Footer, SearchInput, SearchResult }
+  components: { Toolbar, SearchInput, SearchResult }
 };
 </script>
 

@@ -1,11 +1,15 @@
 <template>
+<v-container>
     <v-layout row>
-      
       <v-flex xs12>
-        <v-card flat >
 
-          <div class="text-xs-left"> Результатов найдено: {{ totalItems }} </div>
-        
+          <v-card flat class="text-xs-left"> 
+            
+              Результатов найдено: {{ totalItems }} 
+            
+          </v-card>
+
+        <v-card flat max-width="90%">
           <v-list three-line >
             <item v-for="(item) in items" :key="item">
 
@@ -16,18 +20,17 @@
                 
             </item>
           </v-list>
-          
         </v-card>
-              <v-pagination
-              v-model="items"
-              :length="4"
-              prev-icon="mdi-menu-left"
-              next-icon="mdi-menu-right"
-              ></v-pagination>
-              
-        </v-flex>
-    </v-layout>
 
+        <v-pagination
+          v-model="items"
+          :length="4"
+          prev-icon="mdi-menu-left"
+          next-icon="mdi-menu-right"
+        ></v-pagination>
+      </v-flex>
+    </v-layout>
+</v-container>
 </template>
 
 <script>
@@ -61,14 +64,17 @@ name: "SearchResult",
 
 <style scoped>
     .text{
-        margin-left: 3%;
-        font-size: 20px;
+        font-size: 23px;
         font-weight: bold;
         color: #00008e;
     }
-    .subtitle {
-        margin-left: 3%;
-        margin-top: 1%;
-        width: 90%;
+    .subtitle{
+      font-size: 18px;
     }
+
+  .text-xs-left {
+    margin-bottom: 2%;
+    font-size: 16px;
+  }
+
 </style>

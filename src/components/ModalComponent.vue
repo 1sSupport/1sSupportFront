@@ -1,6 +1,6 @@
 <--
 <template>
-<div>
+<v-container>
     <v-layout row>
       <v-dialog v-model="dialog"  persistent max-width="700" >
         
@@ -59,7 +59,7 @@
         </v-card>
       </v-dialog>
     </v-layout>
-  </div>
+  </v-container>
 </template>
 
 
@@ -76,13 +76,6 @@
 
 <style scoped>
 
- .activ {
-   height: 500px;
-    font-size: 14px;
-    margin-left: 55px;
-    margin-top: 100px;
-    
-  }
 
   .v-btn-save {
     

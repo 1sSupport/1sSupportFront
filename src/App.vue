@@ -4,6 +4,7 @@
     <Toolbar/>
     <SearchInput/>
     <SearchResult/>
+    <ModalComponent/>
     <router-view/>
   </div>
 </template>
@@ -15,7 +16,7 @@ import SearchInput from "./components/SearchInput";
 import SearchResult from "./components/SearchResult";
 export default {
   name: "App",
-  components: { Toolbar, SearchInput, SearchResult }
+  components: { Toolbar, SearchInput, SearchResult, ModalComponent }
 };
 </script>
 

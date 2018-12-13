@@ -1,10 +1,10 @@
 <--
 <template>
-<div>
-    <v-layout row justify-center>
+<v-container>
+    <v-layout row>
       <v-dialog v-model="dialog"  persistent max-width="700" >
         
-        <v-btn slot="activator" color="primary" dark>Open Dialog</v-btn>
+        <v-text  class ="activ" slot="activator" persistent maxwidth="100px" color="grey" dark>Я не нашел подоходящей статьи</v-text>
       
       <v-card > 
 
@@ -59,7 +59,7 @@
         </v-card>
       </v-dialog>
     </v-layout>
-  </div>
+  </v-container>
 </template>
 
 
@@ -75,6 +75,7 @@
 </script>
 
 <style scoped>
+
 
   .v-btn-save {
     
@@ -104,6 +105,7 @@
     height: auto;
   }
 
+ 
 
 
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card flat>
     <div class="header-logo">
       <v-flex xs3>
         <v-img class="v-img-logo" src="https://argos1c.ru/templates/argos/images/logo.png"></v-img>
@@ -20,7 +20,6 @@
     rgba(255, 255, 255, 1) 100%
   );
 }
-
 .v-img-logo {
   left: 40px;
   top: 10px;

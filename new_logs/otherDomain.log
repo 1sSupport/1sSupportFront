@@ -1,0 +1,73 @@
+{
+    "url": "http://v8.1c.ru/lawmonitor/",
+    "Конечный url (для 302)": "http://v8.1c.ru/lawmonitor/lawchanges.jsp",
+    "Title": "Отражение изменений законодательства в программах 1С",
+    "File": "data1",
+    "Уровень": "1. разделы"
+}{
+    "url": "http://1c.ru/rus/partners/training/cso/course.jsp?id=157",
+    "Конечный url (для 302)": "https://1c.ru/cso-part/rus/partners/training/cso/course?id=157",
+    "Title": "Как использовать ИТС (учебный курс)",
+    "File": "data36",
+    "Уровень": "1. разделы"
+}{
+    "url": "http://www.1c.ru/rus/partners/training/default.jsp",
+    "Конечный url (для 302)": "http://1c.ru/rus/partners/training/default.jsp",
+    "Title": "Курсы и экзамены «1С»",
+    "File": "data37",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://its.1c.ru/video?movie=nds_verification",
+    "Конечный url (для 302)": "http://its.1c.ru/video/nds_verification",
+    "Title": "Сверка данных учета НДС",
+    "File": "data38",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://its.1c.ru/video?movie=listsearch",
+    "Конечный url (для 302)": "http://its.1c.ru/video/listsearch",
+    "Title": "Простые способы поиска в списках",
+    "File": "data40",
+    "Уровень": "1. разделы"
+}{
+    "url": "http://1c.ru/rus/partners/training/cso/course.jsp?id=157",
+    "Конечный url (для 302)": "https://1c.ru/cso-part/rus/partners/training/cso/course?id=157",
+    "Title": "Как использовать ИТС (учебный курс)",
+    "File": "data94",
+    "Уровень": "1. разделы"
+}{
+    "url": "http://www.1c.ru/rus/partners/training/default.jsp",
+    "Конечный url (для 302)": "http://1c.ru/rus/partners/training/default.jsp",
+    "Title": "Курсы и экзамены «1С»",
+    "File": "data95",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://its.1c.ru/docs/repdate",
+    "Конечный url (для 302)": "http://its.1c.ru/docs/repdate/",
+    "Title": "Сроки сдачи отчетности и уплаты налогов (взносов)",
+    "File": "data114",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://its.1c.ru/docs/1c-report/v77",
+    "Конечный url (для 302)": "http://its.1c.ru/docs/1c-report/v77/",
+    "Title": "Подключение сервиса \"1С-Отчетность\" для программ системы \"1С:Предприятие&nbsp;7.7\"",
+    "File": "data124",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://portal.1c.ru/applications/3",
+    "Конечный url (для 302)": "https://portal.1c.ru/applications/3",
+    "Title": "Сервис «1С:Контрагент» – проверка непосредственно из программы 1С",
+    "File": "data214",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://its.1c.ru/video?movie=ownconfig",
+    "Конечный url (для 302)": "http://its.1c.ru/video/ownconfig",
+    "Title": "Что взять за основу для собственной конфигурации",
+    "File": "data408",
+    "Уровень": "1. разделы"
+}{
+    "url": "https://its.1c.ru/video?movie=simpleconfig",
+    "Конечный url (для 302)": "http://its.1c.ru/video/simpleconfig",
+    "Title": "Как разработать простое прикладное решение",
+    "File": "data409",
+    "Уровень": "1. разделы"
+}

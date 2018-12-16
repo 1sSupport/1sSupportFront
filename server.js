@@ -12,8 +12,8 @@ const P = '7a31499e';
 const U = '54389-40';
 let log = {};
 
-const startIndex = 38; // Откудава стартовать будем?
-const logsDir = "new_logs"; // Папка для логов
+const startIndex = 374; // Откудава стартовать будем?
+const logsDir = "logs"; // Папка для логов
 
 console.log("start = ",startIndex)
 console.log("logDir = ",logsDir)
@@ -91,7 +91,7 @@ const main = async () => {
         let level1link = ""
         let a = li.find('a')
         if (a.attrs && a.attrs.href) {
-            if  (a.attrs.href.indexOf('http') === -1) {
+            if  (a.attrs.href.indexOf('http') != 0) {
                 if (a.attrs.href.indexOf('download') !== -1) continue
                 level1link = ROOT_URL + a.attrs.href
             }
@@ -125,7 +125,7 @@ const main = async () => {
 
     for (const [index, url] of level1links.entries()) {
         let level2uniquelinks = new Set();
-        let isrepetedlevel2link = {};
+        let isrepeatedlevel2link = {};
         const l1title = level1titles[index];
         let curURL = url;
         let status;
@@ -395,7 +395,7 @@ const main = async () => {
                 } else {
                     level2titles.push(undefined)
                 }
-                if  (a.attrs.href.indexOf('http') === -1) {
+                if  (a.attrs.href.indexOf('http') !== 0) {
                     if (a.attrs.href.indexOf('download') !== -1) continue
                     level2links.push(ROOT_URL + a.attrs.href);
                 }
@@ -413,19 +413,20 @@ const main = async () => {
 
         if(level2links[0] && !level2uniquefirstlink.has(level2links[0]))
         for (const [index, url] of level2links.entries()) {
-            if(!level2uniquelinks.has(url)) {
-                level2uniquelinks.add(url);
-                isrepetedlevel2link[url] = {
+            if(!level2uniquelinks.has(url.split('?')[0])) {
+                level2uniquelinks.add(url.split('?')[0]);
+                isrepeatedlevel2link[url.split('?')[0]] = {
                     index: index,
                     firstData: 'data'+parIndex,
                     title: ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
                     url: ic.decode(Buffer('' + url, 'binary'), "win1251"),
                 }
             } else {
+                console.log("!!!!!!!!!!!! КОПИЯ !!!!!!!!!!!!!!")
                 cohesion[index] = {};
                 cohesion[index].title = ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251") ;
                 cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
-                cohesion[index].repeted = isrepetedlevel2link[url];
+                cohesion[index].repeated = isrepeatedlevel2link[url.split('?')[0]] || "repeated";
                 continue;
             }
             try {
@@ -704,7 +705,9 @@ const main = async () => {
         }
 
         let repeatingLinks_ = {}
+        let isrepeatingRazd = false;
         if(level2links[0] && level2uniquefirstlink.has(level2links[0])) {
+            isrepeatingRazd = true
             repeatingLinks_ = repeatingLinks[level2links[0]]
                                                                             // в лог repeated
                                                                                log = {
@@ -768,7 +771,7 @@ const main = async () => {
                                                                                                      "File": 'data'+(startIndex+index),
                                                                                                      "Уровень": "1. разделы"
                                                                                                  }
-                                                                                                 require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
+                                                                                                 if (!isrepeatingRazd) require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
                                                                                                  // в лог
             }
             require('fs').writeFileSync(`./dumps/data${startIndex+index}.json`, JSON.stringify(results, null, 4));
@@ -982,19 +985,24 @@ resolve(returnList);
 
 
 
-
-
-
-let antiscript = function(body) {
-    let first = body.search(/<[^\/]*script[^>]*>/i);
-    let second = body.search(/<\/script>/i);
+var antiscript = function(body) {
+    let bd = antinrt(body);
+    //let first = bd.search(/<[^\/]*script[^>]*>/i);
+    let first = bd.search(/<script[^>]*>/i);
+    let second = bd.search(/<\/script>/i);
     while(first !== -1) {
-        substr = body.slice(first, second+9)
-        body = body.replace(substr, '')
-        first = body.search(/<[^\/]*script[^>]*>/i);
-        second = body.search(/<\/script>/i);
+        substr = bd.slice(first, second+9)
+        bd = bd.replace(substr, '')
+        first = bd.search(/<script[^>]*>/i);
+        second = bd.search(/<\/script>/i);
     } 
-    return body;
+    return bd;
+} 
+
+var antinrt = function(body) {
+    let re = /(\r)|(\n)|(\t)/g;
+    let newstr = body.replace(re, '');
+    return newstr;
 } 
 
 // ну так уж и быть с др

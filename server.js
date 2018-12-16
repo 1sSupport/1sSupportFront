@@ -350,7 +350,7 @@ const main = async () => {
 
 
         // НЕ УДАЛЯТЬ!
-        if (false && listLevel2.length === 0 ) {
+        if (false && listLevel2.length === 0) {
             const lis = soup2.findAll('div').reduce((accumulator, div) => {
                 if (div.attrs && div.attrs.id && div.attrs.id.indexOf('w_content')!== -1) {
                     accumulator.push(div);
@@ -1002,6 +1002,7 @@ var antiscript = function(body) {
 var antinrt = function(body) {
     let re = /(\r)|(\n)|(\t)/g;
     let newstr = body.replace(re, '');
+    newstr = newstr.replace('<IMG', '<img');
     return newstr;
 } 
 

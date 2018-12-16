@@ -1,3 +1,5 @@
 /dumps
 /node_modules
 dumps.zip
+*.zip
+/img

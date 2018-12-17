@@ -12,7 +12,7 @@ const P = '7a31499e';
 const U = '54389-40';
 let log = {};
 
-const startIndex = 374; // Откудава стартовать будем?
+const startIndex = 0; // Откудава стартовать будем?
 const logsDir = "logs"; // Папка для логов
 
 console.log("start = ",startIndex)
@@ -254,8 +254,10 @@ const main = async () => {
         const soup2 = new JSSoup(level1response.body);
         status = level1response.status;
 
+        let isOtherUrl = false;
         // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
         if(curURL.indexOf('https://its.1c.ru') === -1) {
+            isOtherUrl = true;  
             status = "Э бля, это не https://its.1c.ru"
                                                                                            // в лог otherDomain
                                                                                            log = {
@@ -334,7 +336,7 @@ const main = async () => {
                                                                            "Уровень": "1. разделы"
                                                                        }
                                                                        require('fs').appendFileSync(`./${logsDir}/video.log`, JSON.stringify(log, null, 4));
-                                                                   
+                                                                    
                                                                     // в лог
             listLevel2_4 = soup2.findAll('a').filter(obj => {
                 if (obj.attrs && obj.attrs.class) {
@@ -350,7 +352,7 @@ const main = async () => {
 
 
         // НЕ УДАЛЯТЬ!
-        if (false && listLevel2.length === 0) {
+        if (listLevel2.length === 0) {
             const lis = soup2.findAll('div').reduce((accumulator, div) => {
                 if (div.attrs && div.attrs.id && div.attrs.id.indexOf('w_content')!== -1) {
                     accumulator.push(div);
@@ -771,7 +773,9 @@ const main = async () => {
                                                                                                      "File": 'data'+(startIndex+index),
                                                                                                      "Уровень": "1. разделы"
                                                                                                  }
-                                                                                                 if (!isrepeatingRazd) require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
+                                                                                                 let hdoc_ = ic.decode(Buffer('' + curURL, 'binary'), "win1251")
+                                                                                                 let hdoc = (hdoc_.slice(-5) === '/hdoc' || hdoc_.slice(-6) === '/hdoc/')
+                                                                                                 if (!isrepeatingRazd && !isOtherUrl && !hdoc) require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
                                                                                                  // в лог
             }
             require('fs').writeFileSync(`./dumps/data${startIndex+index}.json`, JSON.stringify(results, null, 4));
@@ -889,98 +893,104 @@ const cookies =
 
 
 
-
+/*
+lislis.forEach((lll) => {
+    console.log(ic.decode(Buffer('' + lll.find('a').contents[0]._text, 'binary'), "win1251"))
+})
+*/
 
 
 
 let postpost = async function (lis, count) {
-    return await new Promise(async(resolve, reject) => {
-    if (count > 3) {
-        resolve([])
-        return
-    }
-    console.log('\x1b[34mcount = %s\x1b[0m', count)
-
-    let returnList = []
-
-    let level1links = []
-
-    for (const [index, li] of lis.entries()) {
-        try {
-        if(li.attrs && li.attrs.class && li.attrs.class.indexOf('icon0') !== -1) {
-            returnList.push(li)
+        if (count > 10) {
+            return []
         }
-        else {
-            let level1link = ""
-            let a = li.find('a')
-            if (a.attrs && a.attrs.href) {
-                if  (a.attrs.href.indexOf('http') === -1) {
-                    level1link = ROOT_URL + a.attrs.href
+        console.log('\x1b[34mcount = %s\x1b[0m', count)
+
+        let returnList = []
+
+        let level1links = []
+        let level1list = []
+        for (const [index, li] of lis.entries()) {
+            console.log(ic.decode(Buffer('' + li.find('a').contents[0]._text, 'binary'), "win1251"))
+            try {
+                if(li.attrs && li.attrs.class && li.attrs.class.indexOf('icon0') !== -1) {
+                    returnList.push(li)
                 }
-                else {
-                    level1link = a.attrs.href
+                else if (li.attrs && li.attrs.class && li.attrs.class.indexOf('folder') !== -1) {
+                    let level1link = ""
+                    let a = li.find('a')    
+                    if (a.attrs && a.attrs.href) {
+                        if  (a.attrs.href.indexOf('http') === -1) {
+                            level1link = ROOT_URL + a.attrs.href
+                        }
+                        else {
+                            level1link = a.attrs.href
+                        }
+                    }
+                    level1links.push(level1link)
+                    level1list.push(a.contents[0]._text)
                 }
             }
-            level1links.push(level1link)
+            catch(error) {
+                continue
+            }
         }
-    }
-    catch(error) {
-        continue
-    }
-    }
 
-    let level1response;
-    for (const [index, url] of level1links.entries()) {
-    try {
-        level1response = await new Promise((res, rej) => {
-            request.post(
-            {
-                url: url,
-                jar: j,
-                gzip: true,
-                encoding: 'binary',
-                headers: {
-                    "Content-Type": "text/html; charset=Windows-1251",
-                    "Content-Encoding": "gzip",
-                    'transfer-encoding': 'chunked',
-                  }
-            } , (err, response, body) => {
-                if (err){
-                    reject(err)
-                    return
+        let level1response;
+        for (const [index, url] of level1links.entries()) {
+            try {
+                level1response = await new Promise((res, rej) => {
+                    request.post(
+                    {
+                        url: url,
+                        jar: j,
+                        gzip: true,
+                        encoding: 'binary',
+                        headers: {
+                            "Content-Type": "text/html; charset=Windows-1251",
+                            "Content-Encoding": "gzip",
+                            'transfer-encoding': 'chunked',
+                          }
+                    } , (err, response, body) => {
+                        if (err){
+                            reject(err)
+                            return
+                        }
+                        if(response.statusCode === 200)
+                        res({
+                                response,
+                                body: body,
+                                status: response.statusCode,
+                            })
+                        else {
+                            rej(err)
+                        }
+                    });
+                });
+            }
+            catch(error) {
+                continue
+            }
+
+            let lisliss = []
+            let qq = new JSSoup(level1response.body).findAll('li').reduce((accumulator, div) => {
+                if (div.attrs && div.attrs.class 
+                    && div.find('a') 
+                    && div.find('a').contents[0]._text === level1list[index]) {
+                    accumulator = [...accumulator, ...div.findAll('li')]
                 }
-                if(response.statusCode === 200)
-                res({
-                        response,
-                        body: body,
-                        status: response.statusCode,
-                    })
-                else {
-                    rej(err)
-                }
-            });
-        });
-    }
-    catch(error) {
-        continue
-    }
-    let listlist = await postpost(new JSSoup(level1response.body).findAll('li').filter(li => {
-        if (li.attrs && li.attrs.class) {
-            return li.attrs.class.indexOf('folder') !== -1
+                return accumulator
+            }, [])
+            let qqq = new JSSoup(level1response.body).findAll('li').filter(li => {
+                if(li.attrs && li.attrs.class) return li.attrs.class.indexOf('icon0') !== -1
+                else return false
+            })
+            lisliss = [...lisliss, ...qq, ...qqq]
+            listlist = await postpost(lisliss, count+1);
+            if(listlist && listlist[0]) returnList = [...returnList, ...listlist]
         }
-        else {
-            return false
-        }
-    }), count+1)
-    if(listlist) returnList = [...returnList, ...listlist]
-}
-resolve(returnList);
-    }).then((arr) => {
-        return arr
-       })
-       .catch((err) => {
-        return []
-       });
+        return  returnList;
 }
 
 
@@ -1002,8 +1012,10 @@ var antiscript = function(body) {
 var antinrt = function(body) {
     let re = /(\r)|(\n)|(\t)/g;
     let newstr = body.replace(re, '');
-    newstr = newstr.replace('<IMG', '<img');
+    newstr = newstr.replace('<IMG', '<img').replace(/<!--\[if lt IE ?\]><!\[endif\]-->/,'');
     return newstr;
 } 
+
+
 
 // ну так уж и быть с др

@@ -3,3 +3,6 @@
 dumps.zip
 *.zip
 /img
+/logs
+/new_logs
+test.js

@@ -1,22 +1,20 @@
 
 <template>
   <div id="app">
-    <Toolbar/>
-    <SearchInput/>
-    <SearchResult/>
-    <ModalComponent/>
+    <toolbar/>
     <router-view/>
+
   </div>
 </template>
 
 <script>
 import ModalComponent from "./components/ModalComponent";
 import Toolbar from "./components/Toolbar";
-import SearchInput from "./components/SearchInput";
-import SearchResult from "./components/SearchResult";
+import axios from 'axios';
 export default {
   name: "App",
-  components: { Toolbar, SearchInput, SearchResult, ModalComponent }
+  components: { ModalComponent, Toolbar }
+
 };
 </script>
 

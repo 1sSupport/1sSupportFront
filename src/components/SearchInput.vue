@@ -17,6 +17,7 @@
                   clearable
                   hide-details
                   @input="HintSelections(searchString)"
+                  @change="searchRequest($event)"
                 ></v-text-field>
                 <v-list>
                   <v-list-tile
@@ -49,7 +50,16 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
+  name: "SearchInput",
+  props: {
+    sessionId: {
+      required: false,
+      type: String
+    }
+  },
   data() {
     return {
       searchString: "",
@@ -90,6 +100,9 @@ export default {
     this.overlapNewHint = this.allHint;
   },
   methods: {
+    searchRequest: function(payload) {
+      this.$emit('search', payload)
+    },
     PickHint(text) {
       this.searchString = text;
       this.showHints = false;
@@ -120,7 +133,7 @@ export default {
       }
     },
     GetArticles(searchString) {
-      alert('Поисковой запрос по запросу "' + this.searchString + '"');
+      // alert('Поисковой запрос по запросу "' + this.searchString + '"');
     }
   }
 };

@@ -3,6 +3,7 @@
   <div>
     <search-input
       @search="searchHandler($event)"/>
+    <not-found-message v-if="noDataInResponse"/>
     <search-result
       :searchResponse="searchRequestResponse"
       :token="token"
@@ -19,17 +20,21 @@
 import SearchInput from "../components/SearchInput";
 import SearchResult from "../components/SearchResult";
 import ModalComponent from "../components/ModalComponent";
+import NotFoundMessage from "../components/NotFoundMessage"
 import axios from 'axios'
 
 export default {
   name: "MainView",
-  components: { SearchInput, SearchResult, ModalComponent},
+  components: { SearchInput, SearchResult, ModalComponent, NotFoundMessage},
   data() {
     return {
+      // not necessary to have Token and SessionId as data here,
+      // but it's easier to debug
       token: "",
       sessionId: "",
       searchRequestResponse: [],
-      lastQuery: ""
+      lastQuery: "",
+      noDataInResponse: false
     }
   },
   methods: {
@@ -64,6 +69,7 @@ export default {
         }
       }
       var response = await axios(axiosConfig)
+      response.data.length == 0 ? this.noDataInResponse = true : this.noDataInResponse = false
       return response.data
     },
     searchHandler: async function(payload) {
@@ -73,8 +79,12 @@ export default {
   },
   created() {
     (async () => {
-      this.token = await this.getToken();
-      this.sessionId = await this.startSession(this.token);
+      // not necessary to have Token and SessionId as data here,
+      // but it's easier to debug
+      this.token = await this.getToken()
+      this.$store.dispatch("updateAuthorizationToken", this.token)
+      this.sessionId = await this.startSession(this.token)
+      this.$store.dispatch("updateSessionId", this.sessionId)
     })()
   }
 };

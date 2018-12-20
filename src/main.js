@@ -7,7 +7,15 @@ import router from './router';
 import Vuetify from 'vuetify';
 
 Vue.use(Vuetify, {
-  iconfont: 'md' // 'md' || 'mdi' || 'fa' || 'fa4'
+  theme: {
+    primary: '#003399',
+	  secondary: '#424242',
+	  accent: '#003399',
+	  error: '#FF5252',
+	  info: '#004EEB',
+	  success: '#4CAF50',
+	  warning: '#FFC107'
+  }
 });
 
 Vue.config.productionTip = false;
@@ -16,8 +24,11 @@ Vue.config.productionTip = false;
 new Vue({
   el: '#app',
   router,
-  components: { App } ,
+  components: {
+    App
+  },
   template: '<App/>',
-  data: () => ({
-  })
+  methods: {
+
+  }
 });

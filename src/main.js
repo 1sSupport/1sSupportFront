@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 import Vuetify from 'vuetify'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import 'vuetify/dist/vuetify.min.css'
 
 Vue.use(Vuetify)
 

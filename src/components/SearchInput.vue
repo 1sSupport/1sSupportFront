@@ -8,9 +8,19 @@
           </v-card-title>
 
           <v-card-actions>
-            <v-layout>
-              <v-flex xs8>
-                <v-text-field
+            <v-layout row wrap>
+              <v-flex xs12 sm8>
+                <v-autocomplete
+                  :items="marks"
+                  :menu-props="{ overflowY: false}"
+                  v-model="searchString"
+                  clearable
+                  solo
+                  hide-no-data
+                  hide-details
+                  label="Поиск"
+                ></v-autocomplete>
+                <!-- <v-text-field
                   v-model="searchString"
                   label="Search"
                   solo
@@ -18,27 +28,24 @@
                   hide-details
                   @input="HintSelections(searchString)"
                   @change="searchRequest($event)"
-                ></v-text-field>
-                <v-list>
-                  <v-list-tile
-                    v-for="item in shownHint"
-                    :key="item.id"
-                    @click="PickHint(item.text)"
-                    v-if="showHints"
-                  >
+                ></v-text-field>-->
+                <!-- <v-menu v-model="showHints" bottom right> -->
+                <!-- <v-list elevation-24>
+                  <v-list-tile v-for="item in shownHint" :key="item" @click="PickHint(item)">
                     <v-list-tile-content>
-                      <v-list-tile-title v-html="item.text"></v-list-tile-title>
+                      <v-list-tile-title v-html="item"></v-list-tile-title>
                     </v-list-tile-content>
                   </v-list-tile>
-                </v-list>
+                </v-list>-->
+                <!-- </v-menu> -->
               </v-flex>
-              <v-flex xs2>
+              <v-flex xs12 sm2>
                 <v-btn
                   color="#3f66b2"
                   style="height: 47px"
                   @click.native.stop="GetArticles(searchString)"
                 >
-                  <v-icon dark>search</v-icon>
+                  <v-icon medium color="white">search</v-icon>
                 </v-btn>
               </v-flex>
             </v-layout>
@@ -50,87 +57,51 @@
 </template>
 
 <script>
-import axios from 'axios';
-
+import axios from "axios";
 export default {
   name: "SearchInput",
   props: {
     sessionId: {
       required: false,
       type: String
+    },
+    marks: {
+      required: true,
+      type: Array
     }
   },
   data() {
     return {
       searchString: "",
-      usersView: true,
-      showHints: false,
-      shownHint: [],
-      overlapOldHint: [],
-      overlapNewHint: [],
-      allHint: [
-        {
-          id: 1,
-          text: "иностранцы"
-        },
-        {
-          id: 2,
-          text: "налоги"
-        },
-        {
-          id: 3,
-          text: "иностранцы1"
-        },
-        {
-          id: 4,
-          text: "иииии"
-        },
-        {
-          id: 5,
-          text: "иноаааа"
-        },
-        {
-          id: 6,
-          text: "налоги78888"
-        }
-      ]
+      shownHint: []
+      // showHints: false
     };
   },
   mounted() {
-    this.overlapNewHint = this.allHint;
+    this.shownHint = this.marks.slice(0, 5);
   },
   methods: {
     searchRequest: function(payload) {
-      this.$emit('search', payload)
+      this.$emit("search", payload);
     },
     PickHint(text) {
       this.searchString = text;
       this.showHints = false;
     },
     HintSelections(searchString) {
-      //alert(searchString);
-      this.overlapOldHint = this.overlapNewHint;
-      this.overlapNewHint = [];
-      for (var i = 0; i < this.overlapOldHint.length; i++) {
-        if (this.overlapOldHint[i].text.startsWith(searchString)) {
-          this.overlapNewHint.push(this.overlapOldHint[i]);
-          console.log(this.overlapOldHint[i]);
+      //alert("a");
+      this.shownHint = [];
+      var search = searchString.toLowerCase();
+      for (var i = 0; i < this.marks.length; i++) {
+        var mark = this.marks[i].toLowerCase();
+        if (mark.indexOf(search) > -1 && this.shownHint.length < 5) {
+          this.shownHint.push(this.marks[i]);
         }
       }
-      if (this.overlapNewHint.length >= 5) {
-        this.shownHint = this.overlapNewHint.slice(0, 5);
-      } else {
-        this.shownHint = this.overlapNewHint.slice(
-          0,
-          this.overlapNewHint.length
-        );
-      }
-      if (searchString != null && searchString.length != 0) {
-        this.showHints = true;
-      } else {
-        this.showHints = false;
-        this.overlapNewHint = this.allHint;
-      }
+      this.showHints = true;
+    },
+    customFilter(item, queryText, itemText) {
+      return true;
     },
     GetArticles(searchString) {
       // alert('Поисковой запрос по запросу "' + this.searchString + '"');

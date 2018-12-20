@@ -1,10 +1,10 @@
 <template>
   <v-card flat>
-    <div class="header-logo">
+    <v-layout class="header-logo" :justify-center="$vuetify.breakpoint.smAndDown">
       <v-flex xs3>
-        <v-img class="v-img-logo" src="https://argos1c.ru/templates/argos/images/logo.png"></v-img>
+        <img class="v-img-logo" src="https://argos1c.ru/templates/argos/images/logo.png">
       </v-flex>
-    </div>
+    </v-layout>
   </v-card>
 </template>
 
@@ -21,9 +21,9 @@
   );
 }
 .v-img-logo {
-  left: 40px;
-  top: 10px;
-  width: 80%;
+  margin-left: 40px;
+  margin-top: 10px;
+  width: auto;
   height: auto;
 }
 </style>

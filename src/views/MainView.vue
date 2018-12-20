@@ -34,7 +34,8 @@ export default {
       sessionId: "",
       searchRequestResponse: [],
       lastQuery: "",
-      noDataInResponse: false
+      noDataInResponse: false,
+      articlesMarks: ""
     }
   },
   methods: {
@@ -75,6 +76,20 @@ export default {
     searchHandler: async function(payload) {
       this.lastQuery = payload
       this.searchRequestResponse = await this.getArticles(payload, this.sessionId)
+    },
+    getMarks: async function(token) {
+      let axiosConfig = {
+        method: "get",
+        url: "http://www.u0612907.plsk.regruhosting.ru/api/Article/GetMarks",
+        headers: {
+          Authorization: "Bearer " + this.token
+        },
+        params: {
+          n: 1
+        }
+      };
+      var response = await axios(axiosConfig);
+      return response.data;
     }
   },
   created() {
@@ -85,6 +100,7 @@ export default {
       this.$store.dispatch("updateAuthorizationToken", this.token)
       this.sessionId = await this.startSession(this.token)
       this.$store.dispatch("updateSessionId", this.sessionId)
+      this.articlesMarks = await this.getMarks(this.token);
     })()
   }
 };

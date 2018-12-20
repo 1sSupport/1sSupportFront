@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" style="background-color:white">
     <toolbar/>
     <keep-alive include="MainView">
       <router-view/>
@@ -17,9 +17,6 @@ export default {
 
 };
 </script>
-
-<style src='vuetify/dist/vuetify.min.css'>
-</style>
 
 <style>
 #app {

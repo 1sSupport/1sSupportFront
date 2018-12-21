@@ -10,34 +10,39 @@
           <v-card-actions>
             <v-layout row wrap>
               <v-flex xs12 sm8>
-                <v-autocomplete
-                  :items="marks"
+                <!-- <v-autocomplete
+                  :items="marksItems"
                   :menu-props="{ overflowY: false}"
-                  v-model="searchString"
+                  browser-autocomplete="on"
+                  :search-input.sync="searchString"
                   clearable
                   solo
                   hide-no-data
                   hide-details
                   label="Поиск"
-                ></v-autocomplete>
-                <!-- <v-text-field
-                  v-model="searchString"
-                  label="Search"
-                  solo
-                  clearable
-                  hide-details
-                  @input="HintSelections(searchString)"
                   @change="searchRequest($event)"
-                ></v-text-field>-->
-                <!-- <v-menu v-model="showHints" bottom right> -->
-                <!-- <v-list elevation-24>
-                  <v-list-tile v-for="item in shownHint" :key="item" @click="PickHint(item)">
+                ></v-autocomplete> -->
+                <v-combobox
+                  v-model="searchString"
+                  :filter="filter"
+                  :items="marksItems"
+                  :search-input.sync="search"
+                  label="Поиск"
+                  hide-no-data
+                  hide-details
+                  solo
+                  append-icon="null"
+                  :menu-props="{ overflowY: false}"
+                >
+                  <template
+                    slot="item"
+                    slot-scope="{ index, item, parent }"
+                  >
                     <v-list-tile-content>
-                      <v-list-tile-title v-html="item"></v-list-tile-title>
+                        {{ item.text }}
                     </v-list-tile-content>
-                  </v-list-tile>
-                </v-list>-->
-                <!-- </v-menu> -->
+                  </template>
+                </v-combobox>
               </v-flex>
               <v-flex xs12 sm2>
                 <v-btn
@@ -73,9 +78,17 @@ export default {
   data() {
     return {
       searchString: "",
-      shownHint: []
+      shownHint: [],
       // showHints: false
+      search: null,
     };
+  },
+  computed: {
+    marksItems: function() {
+      return this.marks.map( (item, index) => {
+        return {"text": item, "value": item}
+      })
+    }
   },
   mounted() {
     this.shownHint = this.marks.slice(0, 5);
@@ -105,6 +118,24 @@ export default {
     },
     GetArticles(searchString) {
       // alert('Поисковой запрос по запросу "' + this.searchString + '"');
+    },
+    // this is default filter function
+    filter (item, queryText, itemText) {
+      if (item.header) return false
+
+      const hasValue = val => val != null ? val : ''
+
+      const text = hasValue(itemText)
+      const query = hasValue(queryText)
+
+      return text.toString()
+        .toLowerCase()
+        .indexOf(query.toString().toLowerCase()) > -1
+    }
+  },
+  watch: {
+    searchString (val, prev) {
+      this.$emit("search", val.text);
     }
   }
 };

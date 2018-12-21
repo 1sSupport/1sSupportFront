@@ -1,11 +1,11 @@
 <template>
-  <div id="app" style="background-color:white">
+  <v-app id="app" style="background-color:white">
     <toolbar/>
     <keep-alive include="MainView">
       <router-view/>
     </keep-alive>
 
-  </div>
+  </v-app>
 </template>
 
 <script>

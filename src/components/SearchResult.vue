@@ -8,7 +8,7 @@
           <v-list three-line>
             <item v-if="searchResponse != false" v-for="(item) in this.searchResponse" :key="item.id">
               <v-list-tile-content>
-                <router-link class="article-title"  :to="{ name: 'ArticlePage', params: {articleId: item.id, token: token, sessionId: sessionId, query: lastQuery}  }">
+                <router-link class="article-title"  :to="{ name: 'ArticlePage', params: {articleId: item.id, query: lastQuery}  }">
                   <v-list-tile-title v-html="item.title"></v-list-tile-title>
                 </router-link>
                 <v-list-tile-sub-title class="article-preview">{{ item.text}}</v-list-tile-sub-title>
@@ -41,17 +41,9 @@
 export default {
   name: "SearchResult",
   props: {
-    token: {
-      required: true,
-      type: String
-    },
     searchResponse: {
       required: false,
       type: Array
-    },
-    sessionId: {
-      required: false,
-      type: Number
     },
     lastQuery: {
       required: true,

@@ -16,7 +16,7 @@ export default new Router({
       component: MainView,
     },
     {
-      path: 'article/:articleId:token',
+      path: 'article/:articleId:query',
       component: ArticlePage,
       name: 'ArticlePage',
       props: true

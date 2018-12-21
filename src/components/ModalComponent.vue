@@ -68,21 +68,15 @@ import axios from 'axios';
   export default {
     name: "ModalComponent",
     props: {
-      token: {
-        required: true,
-        type: String
-      },
-      sessionId: {
-        required: true,
-        type: Number
-      }
     },
     data () {
       return {
         dialog: false,
         supportRequestTelephone: "",
         supportRequestText: "",
-        supportRequestTitle: ""
+        supportRequestTitle: "",
+        token: this.$store.state.authorizationToken,
+        sessionId: this.$store.state.sessionId
       }
     },
     methods: {

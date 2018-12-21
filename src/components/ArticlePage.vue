@@ -78,14 +78,6 @@ export default {
   name: "ArticlePage",
   components: { ModalComponent },
   props: {
-    token: {
-      required: true,
-      type: String
-    },
-    sessionId: {
-      required: false,
-      type: Number
-    },
     articleId: {
       required: true,
       type: Number
@@ -97,6 +89,8 @@ export default {
   },
   data() {
     return {
+      token: this.$store.state.authorizationToken,
+      sessionId: this.$store.state.sessionId,
       rating: 0,
       versions: [
         {

@@ -2,7 +2,7 @@
   <v-card flat>
     <v-layout class="header-logo" :justify-center="$vuetify.breakpoint.smAndDown">
       <v-flex xs3>
-        <img class="v-img-logo" src="https://argos1c.ru/templates/argos/images/logo.png">
+        <img class="v-img-logo" src="@/assets/logo.jpeg"/>
       </v-flex>
     </v-layout>
   </v-card>

@@ -2,16 +2,12 @@
 <template>
   <div>
     <search-input
-      @search="searchHandler($event)"/>
+      @search="searchHandler($event)" :marks="articlesMarks"/>
     <not-found-message v-if="noDataInResponse"/>
     <search-result
       :searchResponse="searchRequestResponse"
-      :token="token"
-      :sessionId="sessionId"
       :lastQuery="lastQuery"/>
-    <modal-component
-      :token="token"
-      :sessionId="sessionId"/>
+    <modal-component/>
 
   </div>
 </template>
@@ -35,7 +31,7 @@ export default {
       searchRequestResponse: [],
       lastQuery: "",
       noDataInResponse: false,
-      articlesMarks: ""
+      articlesMarks: []
     }
   },
   methods: {

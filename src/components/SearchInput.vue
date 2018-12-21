@@ -20,7 +20,7 @@
                   hide-no-data
                   hide-details
                   label="Поиск"
-                  @change="searchRequest($event)"
+
                 ></v-autocomplete> -->
                 <v-combobox
                   v-model="searchString"
@@ -32,6 +32,7 @@
                   hide-details
                   solo
                   append-icon="null"
+                  @change="searchRequest($event)"
                   :menu-props="{ overflowY: false}"
                 >
                   <template

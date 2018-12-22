@@ -15,7 +15,7 @@
           </v-flex>
         </v-layout>
     </div>
-
+    
     <!-- название страницы -->
     <v-container class="titl">
       <v-layout align-center justify-space-between row>
@@ -23,7 +23,7 @@
           <img src="@/assets/ic_arrow_back_24px.png"/>
         </v-flex>
         <v-flex xs10>
-          <!-- <div v-if="article == ''" class="ar-name text-xs-center" v-html="exampleTitl"></div> -->
+          <div v-if="article == ''" class="ar-name text-xs-center" v-html="exampleTitl"></div>
           <div v-if="article != ''" class="ar-name text-xs-center" v-html="article.title"></div>
         </v-flex>
         <v-flex xs1>
@@ -37,39 +37,49 @@
     <!-- статья -->
     <div class="d-art">
       <v-container>
-        <!-- <div v-if="article == ''" class="article" v-html="example"></div> -->
+        <div v-if="article == ''" class="article" v-html="example"></div>
         <div v-if="article != ''" class="article" v-html="article.text"></div>
       </v-container>
     </div>
 
-    <modal-component
-    :token="token"
-    :sessionId="sessionId"/>
+    <!-- черта если блок оценка статей не зафиксирован -->
+    <!-- <dir class="my-hr"></dir> -->
 
-    <!-- черта-->
-    <dir class="my-hr"></dir>
+    <!--  если блок оценка статей зафиксирован -->
+    <dir class="my-br"></dir>
 
     <!-- оценка статьи пользователем -->
-    <div class="feedback text-xs-center">
-      <p class="fb-que">Помогла ли вам информация из этой статьи?</p>
-      <div v-if="rating == '0'" class="fb-answ">Нажмите, чтобы оценить</div>
-      <div v-if="rating == '1'" class="fb-answ">Не помогла совсем</div>
-      <div v-if="rating == '2'" class="fb-answ">Не помогла, но стало ясно в какую сторону думать</div>
-      <div v-if="rating == '3'" class="fb-answ">Помогла, но было сложно найти ответ</div>
-      <div v-if="rating == '4'" class="fb-answ">Помогла достаточно быстро</div>
-      <div v-if="rating == '5'" class="fb-answ">Моментально помогла</div>
-      <v-rating
-        v-model="rating"
-        :hover="true"
-        color="#003399"
-        large="true"
-        :empty-icon="radio_button_unchecked"
-        :full-icon="radio_button_checked"
-      ></v-rating>
-    </div>
+    <v-footer
+      height="auto"
+      fixed="true"
+      color="white"
+    >
+      <v-layout justify-center>
+        <div class="feedback text-xs-center">
+          <p class="fb-que">Помогла ли вам информация из этой статьи?</p>
+          <div v-if="rating == '0'" class="fb-answ">Нажмите, чтобы оценить</div>
+          <div v-if="rating == '1'" class="fb-answ">Не помогла совсем</div>
+          <div v-if="rating == '2'" class="fb-answ">Не помогла, но стало ясно в какую сторону думать</div>
+          <div v-if="rating == '3'" class="fb-answ">Помогла, но было сложно найти ответ</div>
+          <div v-if="rating == '4'" class="fb-answ">Помогла достаточно быстро</div>
+          <div v-if="rating == '5'" class="fb-answ">Моментально помогла</div>
+          <v-rating
+            v-model="rating"
+            :hover="true"
+            color="#003399"
+            large="true"
+            :empty-icon="radio_button_unchecked"
+            :full-icon="radio_button_checked"
+          ></v-rating>
+          <div v-if="rating == '0'"><br></div>
+          <div v-if="rating != '0'">Спасибо, Ваша оценка принята! Вы по-прежнему можете изменить оценку</div>
+        </div>
+      </v-layout>
+    </v-footer>
 
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -129,6 +139,13 @@ export default {
       console.log(response)
       return response.data
     },
+    // отправить оценку на сервер
+    putRating (rating) {
+      if (this.rating != 0)
+      {
+        
+      }
+    }
   },
   mounted() {
     (async () => {
@@ -138,20 +155,24 @@ export default {
 }
 </script>
 
+
 <!-- "scoped" нужно что бы CSS действовало только на этот компонент -->
 <style scoped>
+
     .article {
     font-family: RobReg, 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
   }
+
   /*стили для всей страницы*/
   .art {
     background: white;
     color: #6A6A6A;
     font-family: RobReg;
   }
+
   /*стили для логотипа*/
   .header-logo {
     height: 150px;
@@ -165,86 +186,124 @@ export default {
       rgba(255, 255, 255, 1) 100%
     );
   }
+
   .img-logo {
       padding-bottom: 15px;
       width: 80%;
       height: auto;
     }
+
   /*стили для названия статьи*/
   .ar-name {
     color: #333333;
     font-size: 26px;
   }
+
   .titl {
     padding-bottom: 10px;
     padding-top: 5px;
     background-color: white;
   }
+
   /*стили для черты под названием статьи*/
   .my-hr {
     border-top:  solid #DFDFDF 1px;
     width: 100%;
   }
+
   /*стили для оценки статьи*/
   .fb-answ {
     color: #003399;
     font-size: 18px;
   }
+
   .feedback {
     padding-top: 20px;
     padding-bottom: 15px;
+    /*если блок оценка статей зафиксирован*/
+    border-top:  solid #DFDFDF 1px;
+    width: 100%;
   }
+
   .fb-que {
     color: #333333;
     font-size: 24px;
     margin-bottom: 10px;
   }
+
+  /*если блок оценка статей зафиксирован*/
+  .my-br {
+    height: 190px;
+    background-color: #FCFCFC;
+  }
+
+  
+
+
+
+
+
+
+
   /*стили для статей*/
   .d-art {
     background-color: #FCFCFC;
   }
+
   .article >>> h2, .article >>> b, .article >>> h3, .article >>> h4, .article >>> h5, .article >>> h6 {
     color: #333333;
   }
+
   .article >>> h2 {
     margin-top: 10px;
   }
+
   .article >>> h2.header {
     font-size: 100%;
     font-weight: normal;
   }
-  .article >>> a {
+
+  .article >>> a { 
       color: #003399;
       text-decoration: none;
   }
-  .article >>> a:hover {
+
+  .article >>> a:hover { 
       color: #003399;
       text-decoration: underline;
   }
+
   .article >>> a:visited {
     color: #004EEB;
   }
+
   .article >>> #actinfo, .article >>> .header{
     font-family: RobLig;
   }
+
   .article >>> #actinfo p {
     margin-top: 0px;
     margin-bottom: 0px;
   }
+
   .article >>> ul li {
     list-style: disc;
   }
+
   .article >>> ol, .article >>> ul {
     padding-left: 50px;
   }
+
   .article >>> ol ul, .article >>> ul ol, .article >>> ul ul, .article >>> ol ol {
     padding-left: 25px;
   }
+
   .article >>> #sova_new, .article >>> #sova {
     float: left;
     margin-top: 5px;
     margin-right: 10px;
   }
+
   .article >>> .annotation, .article >>> .dopolnitelno {
     float: right;
     border-left: solid #DFDFDF 1px;
@@ -252,49 +311,62 @@ export default {
     padding-left: 20px;
     margin-left: 20px;
   }
+
   .article >>> div.dir {
     margin-left: 20px;
   }
+
   .article >>> div.dir p {
     text-indent: -20px;
   }
+
   .article >>> div.dir img {
     vertical-align: bottom;
     margin: 0 3pt 0 0;
   }
+
   .article >>> .list li{
     list-style: none;
   }
+
   .article >>> li.list {
     list-style: none;
   }
+
   .article >>> .sample, .article >>> .Primer {
     border-left: solid #DFDFDF 1px;
     padding-left: 20px;
   }
+
   .article >>> .vnimanie {
     color: #004EEB;
   }
+
   .article >>> table {
     border-collapse: collapse;
     border-color: #BFBFBF;
     margin-top: 10px;
     margin-bottom: 10px;
   }
+
   .article >>> th {
     border-color: #BFBFBF;
   }
+
   .article >>> td {
     border-color: #BFBFBF;
     padding: 10px;
   }
+
   .article >>> blockquote p {
     margin-top: 10px;
     margin-bottom: 10px;
   }
+
   .article >>> .Primehanie {
     font-size: 90%;
   }
+
   .article >>> hr {
     border: none;
     color: #DFDFDF;
@@ -303,32 +375,40 @@ export default {
     width: 30%;
     margin-bottom: 10px;
   }
+
   .article >>> .recommendation {
     margin-top: 10px;
   }
+
   .article >>> h4, .article >>> h5, .article >>> h6 {
     font-size: 100%;
   }
+
   .article >>> .note, .article >>> .Vnimanie {
     border: solid 1px red;
     margin: 20px 100px;
     padding: 15px;
     text-align: center;
   }
+
   .article >>> .note p {
     margin: 0px;
   }
+
   .article >>> #actually {
     font-family: RobLig;
     color: red;
   }
+
   .article >>> #actually b {
     color: red;
     font-weight: normal;
   }
+
   .article >>> ul, .article >>> ol {
     margin-bottom: 10px;
   }
+
   /*.article >>> .formula {
     border: solid 1px #BFBFBF;
     margin-left: 20px;
@@ -336,7 +416,7 @@ export default {
     width: 30%;
     font-style: italic;
   }*/
-
+  
   .article >>> .formula {
     margin-bottom: 15px;
     margin-left: 20px;
@@ -344,6 +424,7 @@ export default {
     background-color: #DFDFDF;
     font-style: italic;
   }
+
   /*.article >>> .formula {
     font-style: italic;
     margin-bottom: 15px;
@@ -351,14 +432,17 @@ export default {
     width: 30%;
     font-style: italic;
   }*/
+
   .article >>> .formula p {
     padding: 10px;
     margin: 0px;
   }
+
   .article >>> .obnovlenie {
     color: #333333;
     font-size: 140%;
   }
+
 </style>
 
 

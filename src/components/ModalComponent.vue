@@ -1,10 +1,10 @@
 <template>
   <v-container>
     <v-layout row>
-      <v-dialog v-model="dialog" max-width="700">
+      <v-dialog v-model="dialog" max-width="700"> 
         <p @click="opForm()" class ="activ" slot="activator" persistent maxwidth="100px" color="grey" dark>Я не нашел подоходящей статьи</p>
         <!-- окно форма связи начало -->
-        <v-card v-if="modlst == 1" ref="form" class="text-xs-center">
+        <v-card v-if="modlst == 1" ref="form" class="text-xs-center"> 
 
           <div class = "header-logo">
             <img class="img-logo" src="@/assets/logo.png">
@@ -17,9 +17,9 @@
               <v-layout wrap>
 
                 <v-flex xs12>
-                  <v-text-field
+                  <v-text-field 
                     v-model="phone"
-                    label="Контактный телефон"
+                    label="Контактный телефон" 
                     color="#003399"
                     mask="# (###) ###-##-##"
                     placeholder="8 (123) 456-78-90"
@@ -33,7 +33,7 @@
                 </v-flex>
 
                 <v-flex xs12>
-                  <v-select
+                  <v-select 
                     v-model="theme"
                     color="#003399"
                     :append-icon="null"
@@ -66,13 +66,13 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn class="v-btn-save" color="#003399" @click="submit()">ОТПРАВИТЬ ЗАЯВКУ</v-btn>
+            <v-btn class="v-btn-save" color="#003399" @click="submit()" dark>ОТПРАВИТЬ ЗАЯВКУ</v-btn>
           </v-card-actions>
 
         </v-card>
         <!-- окно форма связи конец -->
         <!-- окно спасибо за заявку начало -->
-        <v-card v-else class="text-xs-center">
+        <v-card v-else class="text-xs-center"> 
 
           <div class = "header-logo">
             <img class="img-logo" src="@/assets/logo.png">
@@ -94,7 +94,7 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn class="v-btn-save" color="#003399" @click.native="dialog = false">ГОТОВО</v-btn>
+            <v-btn class="v-btn-save" color="#003399" @click.native="dialog = false" dark>ГОТОВО</v-btn>
           </v-card-actions>
 
         </v-card>
@@ -112,8 +112,8 @@
     },
     data () {
       return {
-        // token: this.$store.state.authorizationToken,
-        // sessionId: this.$store.state.sessionId,
+        token: this.$store.state.authorizationToken,
+        sessionId: this.$store.state.sessionId,
         dialog: false,
         modlst: 1,
         themes: ['Тема 1', 'Тема 2', 'Тема 3', 'Тема 4'],
@@ -125,18 +125,12 @@
       }
     },
     computed: {
-      form: function() {
+      form () {
         return {
           phone: this.phone,
           theme: this.theme,
           probl: this.probl
         }
-      },
-      token: function() {
-        return this.$store.state.authorizationToken
-      },
-      sessionId: function() {
-        return this.$store.state.sessionId
       }
     },
     watch: {
@@ -186,9 +180,9 @@
 <!-- "scoped" нужно что бы CSS действовало только на этот компонент -->
 <style scoped>
   .v-btn-save {
-    margin-bottom: 30px;
-    margin-top: -40px;
-    margin-right: 32px;
+    bottom: 30px;
+    top: -35px;
+    right: 32px;
     width: 620px;
     color: white;
     font-weight: bold;

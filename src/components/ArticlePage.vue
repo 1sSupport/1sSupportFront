@@ -143,7 +143,8 @@ export default {
       console.log(response)
       return response.data
     },
-    putRating () {
+    // отправить оценку на сервер
+    putRating (rating) {
       if (rating != 0)
       {
         

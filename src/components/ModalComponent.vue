@@ -112,11 +112,9 @@
     },
     data () {
       return {
-        // token: this.$store.state.authorizationToken,
-        // sessionId: this.$store.state.sessionId,
         dialog: false,
         modlst: 1,
-        themes: ['Тема 1', 'Тема 2', 'Тема 3', 'Тема 4'],
+        themes: ['Кажется, что-то пошло не так'],
         errorMessages: '',
         phone: null,
         theme: null,
@@ -158,6 +156,18 @@
         })
         if (this.formHasErrors == false) this.closeAndSend()
       },
+      getMessageThemes: async function() {
+        let axiosConfig = {
+          method: "get",
+          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/GetSupportMessageTitle",
+          headers: {
+            "Authorization": "Bearer " + this.token
+          }
+        }
+        var response = await axios(axiosConfig)
+        console.log(response)
+        return response.data
+      },
       closeAndSend: async function() {
         this.modlst = 2
         let axiosConfig = {
@@ -167,18 +177,24 @@
             "Authorization": "Bearer " + this.token
           },
           data: {
-            // supportMessage: {
-              "ContactData": this.phone,
-              "SessionID": this.sessionId,
-              "Text": this.probl,
-              "Title": this.theme
-            // }
+            "contactdata": this.phone,
+            "sessionid": this.sessionId,
+            "text": this.probl,
+            "title": this.theme
           }
         }
         var response = await axios(axiosConfig)
         console.log(response)
         // return response.data
       }
+    },
+    watch: {
+      dialog: async function() {
+          this.themes = await this.getMessageThemes()
+      }
+    },
+    mounted() {
+
     }
   }
 </script>

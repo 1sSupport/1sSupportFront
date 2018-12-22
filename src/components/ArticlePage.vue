@@ -144,8 +144,8 @@ export default {
       return response.data
     },
     // отправить оценку на сервер
-    putRating (rating) {
-      if (rating != 0)
+    putRating (this.rating) {
+      if (this.rating != 0)
       {
         
       }

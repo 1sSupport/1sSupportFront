@@ -134,7 +134,7 @@
         return this.$store.state.authorizationToken
       },
       sessionId: function() {
-        this.$store.state.sessionId
+        return this.$store.state.sessionId
       }
     },
     watch: {

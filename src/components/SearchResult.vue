@@ -25,12 +25,12 @@
           </v-list>
         </v-card>
 
-        <v-pagination v-if="searchResponse.length == 0"
+        <!-- <v-pagination v-if="searchResponse.length == 0"
           v-model="items"
           :length="4"
           prev-icon="mdi-menu-left"
           next-icon="mdi-menu-right"
-        ></v-pagination>
+        ></v-pagination> -->
       </v-flex>
     </v-layout>
   </v-container>

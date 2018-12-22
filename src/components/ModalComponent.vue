@@ -66,7 +66,7 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn class="v-btn-save" color="#003399" @click="submit()">ОТПРАВИТЬ ЗАЯВКУ</v-btn>
+            <v-btn class="v-btn-save" color="#003399" @click="submit()" dark>ОТПРАВИТЬ ЗАЯВКУ</v-btn>
           </v-card-actions>
 
         </v-card>
@@ -94,7 +94,7 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn class="v-btn-save" color="#003399" @click.native="dialog = false">ГОТОВО</v-btn>
+            <v-btn class="v-btn-save" color="#003399" @click.native="dialog = false" dark>ГОТОВО</v-btn>
           </v-card-actions>
 
         </v-card>
@@ -123,7 +123,7 @@
       }
     },
     computed: {
-      form: function() {
+      form () {
         return {
           phone: this.phone,
           theme: this.theme,
@@ -134,7 +134,7 @@
         return this.$store.state.authorizationToken
       },
       sessionId: function() {
-        return this.$store.state.sessionId
+        this.$store.state.sessionId
       }
     },
     watch: {
@@ -202,9 +202,9 @@
 <!-- "scoped" нужно что бы CSS действовало только на этот компонент -->
 <style scoped>
   .v-btn-save {
-    margin-bottom: 30px;
-    margin-top: -40px;
-    margin-right: 32px;
+    bottom: 30px;
+    top: -35px;
+    right: 32px;
     width: 620px;
     color: white;
     font-weight: bold;

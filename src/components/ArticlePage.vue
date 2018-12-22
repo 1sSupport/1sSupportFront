@@ -42,10 +42,6 @@
       </v-container>
     </div>
 
-    <modal-component
-    :token="token"
-    :sessionId="sessionId"/>
-
     <!-- черта если блок оценка статей не зафиксирован -->
     <!-- <dir class="my-hr"></dir> -->
 

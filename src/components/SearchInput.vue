@@ -32,7 +32,7 @@
                   hide-details
                   solo
                   append-icon="null"
-                  @change="searchRequest($event)"
+
                   :menu-props="{ overflowY: false}"
                 >
                   <template
@@ -81,7 +81,7 @@ export default {
       searchString: "",
       shownHint: [],
       // showHints: false
-      search: null,
+      search: "",
     };
   },
   computed: {
@@ -136,7 +136,13 @@ export default {
   },
   watch: {
     searchString (val, prev) {
-      this.$emit("search", val.text);
+      console.log(val)
+      if ("text" in val) {
+        this.$emit("search", val.text)
+      }
+      else {
+        this.$emit("search", val)
+      }
     }
   }
 };

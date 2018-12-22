@@ -1,10 +1,8 @@
 <template>
   <v-app id="app" style="background-color:white">
-    <toolbar/>
-    <keep-alive include="MainView">
+    <keep-alive include="DefaultView">
       <router-view/>
     </keep-alive>
-
   </v-app>
 </template>
 

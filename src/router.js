@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 // import Home from './views/Home.vue'
+import DefaultView from '@/views/DefaultView'
 import MainView from '@/views/MainView';
 import ArticlePage from '@/components/ArticlePage';
 
@@ -12,8 +13,15 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'MainView',
-      component: MainView,
+      name: 'DefaultView',
+      component: DefaultView,
+      children: [
+        {
+          path: '',
+          name: 'MainView',
+          component: MainView
+        }
+      ]
     },
     {
       path: 'article/:articleId:query',
@@ -21,6 +29,7 @@ export default new Router({
       name: 'ArticlePage',
       props: true
     }
+
     // {
     //   path: '/about',
     //   name: 'about',

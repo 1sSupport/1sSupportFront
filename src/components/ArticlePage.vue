@@ -66,6 +66,8 @@
         :empty-icon="radio_button_unchecked"
         :full-icon="radio_button_checked"
       ></v-rating>
+      <div v-if="rating == '0'"><br></div>
+      <div v-if="rating != '0'">Спасибо, Ваша оценка принята! Вы по-прежнему можете изменить оценку</div>
     </div>
 
   </div>

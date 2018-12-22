@@ -112,8 +112,8 @@
     },
     data () {
       return {
-        token: this.$store.state.authorizationToken,
-        sessionId: this.$store.state.sessionId,
+        // token: this.$store.state.authorizationToken,
+        // sessionId: this.$store.state.sessionId,
         dialog: false,
         modlst: 1,
         themes: ['Тема 1', 'Тема 2', 'Тема 3', 'Тема 4'],
@@ -125,12 +125,18 @@
       }
     },
     computed: {
-      form () {
+      form: function() {
         return {
           phone: this.phone,
           theme: this.theme,
           probl: this.probl
         }
+      },
+      token: function() {
+        return this.$store.state.authorizationToken
+      },
+      sessionId: function() {
+        return this.$store.state.sessionId
       }
     },
     watch: {

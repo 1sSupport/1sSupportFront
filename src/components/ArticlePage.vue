@@ -143,6 +143,12 @@ export default {
       console.log(response)
       return response.data
     },
+    putRating () {
+      if (rating != 0)
+      {
+        
+      }
+    }
   },
   mounted() {
     (async () => {

@@ -165,6 +165,11 @@ export default {
     (async () => {
       this.article = await this.getArticle(this.articleId, this.query);
     })()
+  },
+  beforeDestroy() {
+    (async () => {
+      this.sendRating(this.articleId, this.rating, this.sessionId);
+    })()
   }
 }
 </script>

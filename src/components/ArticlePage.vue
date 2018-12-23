@@ -140,10 +140,24 @@ export default {
       return response.data
     },
     // отправить оценку на сервер
-    putRating (rating) {
-      if (this.rating != 0)
+    sendRating: async function(artId, rating, sesId) {
+      if (rating != 0)
       {
-        
+        let axiosConfig = {
+          method: "post",
+          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/SetMark",
+          headers: {
+            "Authorization": "Bearer " + this.token
+          },
+          data: {
+            "articleId": artId,
+            "mark": rating,
+            "sessionId": sesId
+          }
+        }
+        var response = await axios(axiosConfig)
+        console.log(response)
+        // return response.data
       }
     }
   },

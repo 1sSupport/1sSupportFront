@@ -166,6 +166,7 @@ export default {
       this.article = await this.getArticle(this.articleId, this.query);
     })()
   },
+  // отправить оценку на сервер после закрытия страницы
   beforeDestroy() {
     (async () => {
       this.sendRating(this.articleId, this.rating, this.sessionId);

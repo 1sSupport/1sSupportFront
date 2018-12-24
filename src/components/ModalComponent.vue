@@ -1,119 +1,127 @@
 <template>
-  <v-layout row justify-center>
-    <v-dialog v-model="dialog" max-width="700"> 
-      <v-btn slot="activator" color="primary" @click="opForm" flat>Я не нашел подходящей статьи</v-btn>
-      <!-- окно форма связи начало -->
-      <v-card v-if="modlst == 1" ref="form" class="text-xs-center"> 
+  <v-container>
+    <v-layout row>
+      <v-dialog v-model="dialog" max-width="700">
+        <p @click="opForm()" class ="activ" slot="activator" persistent maxwidth="100px" color="grey" dark>Я не нашел подоходящей статьи</p>
+        <!-- окно форма связи начало -->
+        <v-card v-if="modlst == 1" ref="form" class="text-xs-center">
 
-        <div class = "header-logo">
-          <img class="img-logo" src="@/assets/logo.png">
-          <v-btn flat icon color="#003399" class="ic-btn" @click.native="dialog = false">
-            <v-icon>clear</v-icon>
-          </v-btn>
-        </div>
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
+          <div class = "header-logo">
+            <img class="img-logo" src="@/assets/logo.png">
+            <v-btn flat icon color="#003399" class="ic-btn" @click.native="dialog = false">
+              <v-icon>clear</v-icon>
+            </v-btn>
+          </div>
+          <v-card-text>
+            <v-container grid-list-md>
+              <v-layout wrap>
 
-              <v-flex xs12>
-                <v-text-field 
-                  label="Контактный телефон" 
-                  color="#003399"
-                  mask="# (###) ###-##-##"
-                  placeholder="8 (123) 456-78-90"
-                  ref="phone"
-                  v-model="phone"
-                  :rules="[
-                    () => !!phone || 'Пожалуйста, введите номер телефона',
-                  ]"
-                  :error-messages="errorMessages"
-                  required
-                ></v-text-field>
-              </v-flex>
+                <v-flex xs12>
+                  <v-text-field
+                    v-model="phone"
+                    label="Контактный телефон"
+                    color="#003399"
+                    mask="# (###) ###-##-##"
+                    placeholder="8 (123) 456-78-90"
+                    ref="phone"
+                    :rules="[
+                      () => !!phone || 'Пожалуйста, введите номер телефона',
+                    ]"
+                    :error-messages="errorMessages"
+                    required
+                  ></v-text-field>
+                </v-flex>
 
-              <v-flex xs12>
-                <v-select 
-                  color="#003399"
-                  :append-icon="null"
-                  :items="themes"
-                  label="Тема обращения"
-                  ref="theme"
-                  v-model="theme"
-                  :rules="[() => !!theme || 'Пожалуйста, укажите тему обращения']"
-                  :error-messages="errorMessages"
-                  required
-                ></v-select>
-              </v-flex>
+                <v-flex xs12>
+                  <v-select
+                    v-model="theme"
+                    color="#003399"
+                    :append-icon="null"
+                    :items="themes"
+                    label="Тема обращения"
+                    ref="theme"
+                    :rules="[() => !!theme || 'Пожалуйста, укажите тему обращения']"
+                    :error-messages="errorMessages"
+                    required
+                  ></v-select>
+                </v-flex>
 
-              <v-flex xs12>
-                <v-textarea
-                  color="#003399"
-                  rows='3'
-                  label="Пожалуйста, опишите вашу проблему и мы свяжемся с вами"
-                  ref="probl"
-                  v-model="probl"
-                  :rules="[() => !!probl || 'Пожалуйста, опишите вашу проблему']"
-                  :error-messages="errorMessages"
-                  required
-                ></v-textarea>
-              </v-flex>
+                <v-flex xs12>
+                  <v-textarea
+                    v-model="probl"
+                    color="#003399"
+                    rows='3'
+                    label="Пожалуйста, опишите вашу проблему и мы свяжемся с вами"
+                    ref="probl"
+                    :rules="[() => !!probl || 'Пожалуйста, опишите вашу проблему']"
+                    :error-messages="errorMessages"
+                    required
+                  ></v-textarea>
+                </v-flex>
 
-            </v-layout>
-          </v-container>
-          <small></small>
-        </v-card-text>
+              </v-layout>
+            </v-container>
+            <small></small>
+          </v-card-text>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="v-btn-save" color="#003399" @click="submit">ОТПРАВИТЬ ЗАЯВКУ</v-btn>
-        </v-card-actions>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn class="v-btn-save" color="#003399" @click="submit()" dark>ОТПРАВИТЬ ЗАЯВКУ</v-btn>
+          </v-card-actions>
 
-      </v-card>
-      <!-- окно форма связи конец -->
-      <!-- окно спасибо за заявку начало -->
-      <v-card v-else class="text-xs-center"> 
+        </v-card>
+        <!-- окно форма связи конец -->
+        <!-- окно спасибо за заявку начало -->
+        <v-card v-else class="text-xs-center">
 
-        <div class = "header-logo">
-          <img class="img-logo" src="@/assets/logo.png">
-          <!-- <v-img class="v-img-logo" src="https://argos1c.ru/templates/argos/images/logo.png"></v-img> -->
-          <v-btn flat icon color="#003399" class="ic-btn" @click.native="dialog = false">
-            <v-icon>clear</v-icon>
-          </v-btn>
-        </div>
+          <div class = "header-logo">
+            <img class="img-logo" src="@/assets/logo.png">
+            <!-- <v-img class="v-img-logo" src="https://argos1c.ru/templates/argos/images/logo.png"></v-img> -->
+            <v-btn flat icon color="#003399" class="ic-btn" @click.native="dialog = false">
+              <v-icon>clear</v-icon>
+            </v-btn>
+          </div>
 
-        <v-card-text>
-          <v-flex xs12>
-            <br><br><br>
-            <p class="p1">Спасибо!<br>Ваша заявка успешно отправлена!</p>
-            <br>
-            <p class="p2">В скором времени с Вами свяжется наш специалист.<br>Надеемся, наши совместные усилия сделают Вашу работу проще и приятнее.</p>
-            <br><br>
-          </v-flex>
-        </v-card-text>
+          <v-card-text>
+            <v-flex xs12>
+              <br><br><br>
+              <p class="p1">Спасибо!<br>Ваша заявка успешно отправлена!</p>
+              <br>
+              <p class="p2">В скором времени с Вами свяжется наш специалист.<br>Надеемся, наши совместные усилия сделают Вашу работу проще и приятнее.</p>
+              <br><br>
+            </v-flex>
+          </v-card-text>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="v-btn-save" color="#003399" @click.native="dialog = false">ГОТОВО</v-btn>
-        </v-card-actions>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn class="v-btn-save" color="#003399" @click.native="dialog = false" dark>ГОТОВО</v-btn>
+          </v-card-actions>
 
-      </v-card>
-      <!-- окно спасибо за заявку конец -->
-    </v-dialog>
-  </v-layout>
+        </v-card>
+        <!-- окно спасибо за заявку конец -->
+      </v-dialog>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
+  import axios from 'axios';
   export default {
-    data: () => ({
-      dialog: false,
-      modlst: 1,
-      themes: ['Тема 1', 'Тема 2', 'Тема 3', 'Тема 4'],
-      errorMessages: '',
-      phone: null,
-      theme: null,
-      probl: null,
-      formHasErrors: false
-    }),
+    name: "ModalComponent",
+    props: {
+    },
+    data () {
+      return {
+        dialog: false,
+        modlst: 1,
+        themes: ['Кажется, что-то пошло не так'],
+        errorMessages: '',
+        phone: null,
+        theme: null,
+        probl: null,
+        formHasErrors: false
+      }
+    },
     computed: {
       form () {
         return {
@@ -121,6 +129,12 @@
           theme: this.theme,
           probl: this.probl
         }
+      },
+      token: function() {
+        return this.$store.state.authorizationToken
+      },
+      sessionId: function() {
+        return this.$store.state.sessionId
       }
     },
     watch: {
@@ -140,8 +154,47 @@
           if (!this.form[f]) this.formHasErrors = true
           this.$refs[f].validate(true)
         })
-        if (this.formHasErrors == false) this.modlst = 2
+        if (this.formHasErrors == false) this.closeAndSend()
+      },
+      getMessageThemes: async function() {
+        let axiosConfig = {
+          method: "get",
+          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/GetSupportMessageTitle",
+          headers: {
+            "Authorization": "Bearer " + this.token
+          }
+        }
+        var response = await axios(axiosConfig)
+        console.log(response)
+        return response.data
+      },
+      closeAndSend: async function() {
+        this.modlst = 2
+        let axiosConfig = {
+          method: "post",
+          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/CreateSupportMessage",
+          headers: {
+            "Authorization": "Bearer " + this.token
+          },
+          data: {
+            "contactdata": this.phone,
+            "sessionid": this.sessionId,
+            "text": this.probl,
+            "title": this.theme
+          }
+        }
+        var response = await axios(axiosConfig)
+        console.log(response)
+        // return response.data
       }
+    },
+    watch: {
+      dialog: async function() {
+          this.themes = await this.getMessageThemes()
+      }
+    },
+    mounted() {
+
     }
   }
 </script>
@@ -149,9 +202,9 @@
 <!-- "scoped" нужно что бы CSS действовало только на этот компонент -->
 <style scoped>
   .v-btn-save {
-    margin-bottom: 30px;
-    margin-top: -40px;
-    margin-right: 32px;
+    bottom: 30px;
+    top: -35px;
+    right: 32px;
     width: 620px;
     color: white;
     font-weight: bold;

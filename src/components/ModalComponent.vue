@@ -106,6 +106,7 @@
 
 <script>
   import axios from 'axios';
+  import {ServerAPIUrls} from "../server_api_urls.js";
   export default {
     name: "ModalComponent",
     props: {
@@ -159,26 +160,25 @@
       getMessageThemes: async function() {
         let axiosConfig = {
           method: "get",
-          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/GetSupportMessageTitle",
+          url: ServerAPIUrls.GET_SUPPORT_MESSAGES_TITLES,
           headers: {
             "Authorization": "Bearer " + this.token
           }
         }
         var response = await axios(axiosConfig)
         console.log(response)
-        return response.data
+        return response.data.data
       },
       closeAndSend: async function() {
         this.modlst = 2
         let axiosConfig = {
           method: "post",
-          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/CreateSupportMessage",
+          url: ServerAPIUrls.CREATE_SUPPORT_MESSAGES,
           headers: {
             "Authorization": "Bearer " + this.token
           },
           data: {
             "contactdata": this.phone,
-            "sessionid": this.sessionId,
             "text": this.probl,
             "title": this.theme
           }

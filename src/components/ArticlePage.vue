@@ -84,6 +84,7 @@
 <script>
 import axios from 'axios';
 import ModalComponent from "./ModalComponent";
+import {ServerAPIUrls} from "../server_api_urls.js";
 export default {
   name: "ArticlePage",
   components: { ModalComponent },
@@ -100,7 +101,6 @@ export default {
   data() {
     return {
       token: this.$store.state.authorizationToken,
-      sessionId: this.$store.state.sessionId,
       rating: 0,
       versions: [
         {
@@ -126,37 +126,32 @@ export default {
     getArticle: async function(id, query) {
       let axiosConfig = {
         method: "get",
-        url: "http://www.u0612907.plsk.regruhosting.ru/api/Article/GetArticle",
+        url: ServerAPIUrls.GET_ARTICLE + "/" + id,
         headers: {
           "Authorization": "Bearer " + this.token
-        },
-        params: {
-          "id": id,
-          "query": query
         }
       }
       let response = await axios(axiosConfig)
       console.log(response)
-      return response.data
+      return response.data.data
     },
     // отправить оценку на сервер
-    sendRating: async function(artId, rating, sesId) {
+    sendRating: async function(artId, rating) {
       if (rating != 0)
       {
         let axiosConfig = {
           method: "post",
-          url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/SetMark",
+          url: ServerAPIUrls.SET_ARTICLES_MARKS,
           headers: {
             "Authorization": "Bearer " + this.token
           },
           data: {
             "articleId": artId,
-            "mark": rating,
-            "sessionId": sesId
+            "mark": rating
           }
         }
         var response = await axios(axiosConfig)
-        console.log(response)
+        console.log(response.data)
         // return response.data
       }
     }
@@ -169,7 +164,7 @@ export default {
   // отправить оценку на сервер после закрытия страницы
   beforeDestroy() {
     (async () => {
-      this.sendRating(this.articleId, this.rating, this.sessionId);
+      this.sendRating(this.articleId, this.rating);
     })()
   }
 }

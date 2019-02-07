@@ -18,6 +18,8 @@ import ModalComponent from "../components/ModalComponent";
 import NotFoundMessage from "../components/NotFoundMessage"
 import axios from 'axios'
 
+import {ServerAPIUrls} from "../server_api_urls.js";
+
 export default {
   name: "MainView",
   components: { SearchInput, SearchResult, ModalComponent, NotFoundMessage},
@@ -35,38 +37,27 @@ export default {
   },
   methods: {
     getToken: async function() {
-      var response = await axios.post("http://www.u0612907.plsk.regruhosting.ru/api/Token/CreateToken", {
+      var response = await axios.post(ServerAPIUrls.LOGIN, {
         inn: "000000000000",
         login: "test"
       });
-      return response.data.access_token
-    },
-    startSession: async function(token) {
-      let axiosConfig = {
-        method: "post",
-        url: "http://www.u0612907.plsk.regruhosting.ru/api/Session/StartSession",
-        headers: {
-          "Authorization": "Bearer " + token
-        }
-      }
-      var response = await axios(axiosConfig)
-      return response.data.sessionId
+      return response.data.data.accessToken
     },
     getArticles: async function(query, sessionId) {
       let axiosConfig = {
         method: "get",
-        url: "http://www.u0612907.plsk.regruhosting.ru/api/Article/GetArticlesByQuery",
+        url: ServerAPIUrls.GET_ARTICLES_PREVIEWS,
         headers: {
           "Authorization": "Bearer " + this.token
         },
         params: {
-          "query": query,
-          "sessionId": sessionId
+          "query": query
         }
       }
       var response = await axios(axiosConfig)
-      response.data.length == 0 ? this.noDataInResponse = true : this.noDataInResponse = false
-      return response.data
+      response.data.data.length == 0 ? this.noDataInResponse = true : this.noDataInResponse = false
+      console.log(response.data.data)
+      return response.data.data
     },
     searchHandler: async function(payload) {
       this.lastQuery = payload
@@ -75,7 +66,7 @@ export default {
     getMarks: async function(token) {
       let axiosConfig = {
         method: "get",
-        url: "http://www.u0612907.plsk.regruhosting.ru/api/Article/GetMarks",
+        url: ServerAPIUrls.GET_ARTICLES_MARKS,
         headers: {
           Authorization: "Bearer " + this.token
         },
@@ -83,8 +74,9 @@ export default {
           n: 1
         }
       };
+      console.log(axiosConfig)
       var response = await axios(axiosConfig);
-      return response.data;
+      return response.data.data;
     }
   },
   created() {
@@ -93,8 +85,6 @@ export default {
       // but it's easier to debug
       this.token = await this.getToken()
       this.$store.dispatch("updateAuthorizationToken", this.token)
-      this.sessionId = await this.startSession(this.token)
-      this.$store.dispatch("updateSessionId", this.sessionId)
       this.articlesMarks = await this.getMarks(this.token);
     })()
   }

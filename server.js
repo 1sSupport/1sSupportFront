@@ -6,13 +6,13 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 // Взять из кукисов
-const PHPSESSID = 'hknaujkuman3o95k96rudsttd2'
+const PHPSESSID = '2hdg9f04g7bntvn4aacfu2fmc7'
 const ROOT_URL = 'https://its.1c.ru';
-const P = '7a31499e';
-const U = '54389-40';
+const P = '801db464';
+const U = '49289-40';
 let log = {};
 
-const startIndex = 0; // Откудава стартовать будем?
+const startIndex = 0; // Откудава стартовать будем? с нуля до 500 примерно
 const logsDir = "logs"; // Папка для логов
 
 console.log("start = ",startIndex)
@@ -24,6 +24,8 @@ const j = request.jar();
 const cookie = request.cookie(`PHPSESSID=${PHPSESSID}`);
 //const cookie = cookies;
 j.setCookie(cookie, ROOT_URL);
+
+const LINKS = new Set();
 
 const main = async () => {
 
@@ -39,6 +41,9 @@ const main = async () => {
     require('fs').writeFileSync(`./${logsDir}/titleError.log`, '');
     require('fs').writeFileSync(`./${logsDir}/repeated.log`, '');
     require('fs').writeFileSync(`./${logsDir}/otherDomain.log`, '');
+    require('fs').writeFileSync(`./${logsDir}/recursion.log`, '');
+    require('fs').writeFileSync(`./${logsDir}/recursionError.log`, '');
+    require('fs').writeFileSync(`./${logsDir}/test.log`, '');
     require('fs').writeFileSync(`./${logsDir}/video.log`, '');
 
     const mainResponse = await new Promise(resolve => {
@@ -56,6 +61,7 @@ const main = async () => {
                 })
             })
       });
+
 
     const soup = new JSSoup(mainResponse.body);
     liList = soup.findAll('li').filter(obj => {
@@ -87,6 +93,7 @@ const main = async () => {
     */
     let repeatingLinks = {}
 
+    if(liList)
     for (const [index, li] of liList.entries()) {
         let level1link = ""
         let a = li.find('a')
@@ -123,6 +130,7 @@ const main = async () => {
     level1links.splice(0, startIndex);
     level1titles.splice(0, startIndex);
 
+    if(level1links)
     for (const [index, url] of level1links.entries()) {
         let level2uniquelinks = new Set();
         let isrepeatedlevel2link = {};
@@ -254,11 +262,9 @@ const main = async () => {
         const soup2 = new JSSoup(level1response.body);
         status = level1response.status;
 
-        let isOtherUrl = false;
         // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
         if(curURL.indexOf('https://its.1c.ru') === -1) {
-            isOtherUrl = true;  
-            status = "Э бля, это не https://its.1c.ru"
+            status = 800
                                                                                            // в лог otherDomain
                                                                                            log = {
                                                                                                "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
@@ -336,7 +342,7 @@ const main = async () => {
                                                                            "Уровень": "1. разделы"
                                                                        }
                                                                        require('fs').appendFileSync(`./${logsDir}/video.log`, JSON.stringify(log, null, 4));
-                                                                    
+                                                                   
                                                                     // в лог
             listLevel2_4 = soup2.findAll('a').filter(obj => {
                 if (obj.attrs && obj.attrs.class) {
@@ -351,8 +357,18 @@ const main = async () => {
         let listLevel2 = [...listLevel2_0, ...listLevel2_1, ...listLevel2_2, ...listLevel2_3, ...listLevel2_4]
 
 
-        // НЕ УДАЛЯТЬ!
-        if (listLevel2.length === 0) {
+        if (listLevel2.length === 0 && curURL.indexOf('https://its.1c.ru') !== -1) {
+
+                                                                        // в лог recursion
+                                                                        log = {
+                                                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                            "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+                                                                            "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                                                                            "File": 'data'+(startIndex+index),
+                                                                            "Уровень": "1. разделы"
+                                                                        }
+                                                                        require('fs').appendFileSync(`./${logsDir}/recursion.log`, JSON.stringify(log, null, 4));
+    
             const lis = soup2.findAll('div').reduce((accumulator, div) => {
                 if (div.attrs && div.attrs.id && div.attrs.id.indexOf('w_content')!== -1) {
                     accumulator.push(div);
@@ -369,7 +385,11 @@ const main = async () => {
                 }, [])
                 lislis = [...lislis, ...qq]
             })
-            listLevel2 = await postpost(lislis, 0);
+            listLevel2 = await postpost(lislis, 0, log);
+
+            console.log('\x1b[31m-- %s\x1b[0m', listLevel2.length)
+            console.log('\x1b[31m-- Array? %s\x1b[0m', listLevel2 instanceof Array)
+            LINKS.clear();
             listLevel2 = listLevel2.map(li => {
                 return li.find('a')
             });
@@ -389,6 +409,7 @@ const main = async () => {
         }
         // убрать
         //listLevel2.length = 0;
+            if(listLevel2)
         for (const [ind, a] of listLevel2.entries()) {
             if (a.attrs && a.attrs.href) {
                 if (a.contents[0]) {
@@ -412,185 +433,56 @@ const main = async () => {
         let level2response
 
         const parIndex = index;
+        let repeatingLinks_ = {}
+        let isrepeatingRazd = false;
 
-        if(level2links[0] && !level2uniquefirstlink.has(level2links[0]))
-        for (const [index, url] of level2links.entries()) {
-            if(!level2uniquelinks.has(url.split('?')[0])) {
-                level2uniquelinks.add(url.split('?')[0]);
-                isrepeatedlevel2link[url.split('?')[0]] = {
-                    index: index,
-                    firstData: 'data'+parIndex,
-                    title: ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                    url: ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                }
-            } else {
-                console.log("!!!!!!!!!!!! КОПИЯ !!!!!!!!!!!!!!")
-                cohesion[index] = {};
-                cohesion[index].title = ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251") ;
-                cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
-                cohesion[index].repeated = isrepeatedlevel2link[url.split('?')[0]] || "repeated";
-                continue;
+        const sets = [];
+
+        if(level2links[0] && !level2uniquefirstlink.has(level2links[0])) {
+            let size = 500; //размер подмассива
+            const amountOfLinks=level2links.length;
+            let sublevel2links = []; //массив в который будет выведен результат.
+            for (let i = 0; i <Math.ceil(level2links.length/size); i++){
+                sublevel2links[i] = level2links.slice((i*size), (i*size) + size);
             }
-            try {
-                level2response = await new Promise((resolve, reject) => {
-                    request.post(
-                    {
-                        url: url,
-                        jar: j,
-                        gzip: true,
-                        encoding: 'binary',
-                        headers: {
-                            "Content-Type": "text/html; charset=Windows-1251",
-                            "Content-Encoding": "gzip",
-                            'transfer-encoding': 'chunked',
-                          }
-                    } , (err, response, body) => {
-                        if (err){
-                            reject(err)
-                            return
-                        }
-                        //выводим в консоль инфу со статусом
-                        console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
-                                    `-- Content ${index+1}/${level2links.length} fetched ${url} with ${response.statusCode}`)
-                        resolve({
-                            response,
-                            body: body,
-                            status: response.statusCode,
-                        })
-                    });
+            for(const [i, level2links] of sublevel2links.entries()) {
+                console.log(process.memoryUsage());
+                if(i<0)continue; // 34106
+                sets.push(new Set())
+            for (const [index, url] of level2links.entries()) {
+
+                const stop = sets.some(set => {
+                    return set.has(url)
                 });
-                let sta = level2response.status
-                                                                                    // в лог 301 302
-                                                                                    if (sta === 302 || sta === 301) {
-                                                                                        log = {
-                                                                                            "Cтатус": sta,
-                                                                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                            "Конечный url": "301 302 тут не обрабатывается",
-                                                                                            "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                            "File": 'data'+(startIndex+parIndex),
-                                                                                            "Уровень": "2. статьи"
-                                                                                        }
-                                                                                        require('fs').appendFileSync(`./${logsDir}/${sta}fail.log`, JSON.stringify(log, null, 4));
-                                                                                    }
-                                                                                    else if (sta === 404 || sta === 401) {
-                                                                                        log = {
-                                                                                            "Cтатус": sta,
-                                                                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                            "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                            "File": 'data'+(startIndex+parIndex),
-                                                                                            "Уровень": "2. статьи"
-                                                                                        }
-                                                                                        require('fs').appendFileSync(`./${logsDir}/${sta}.log`, JSON.stringify(log, null, 4));
-                                                                                    }
-                                                                                    else if (sta !== 200) {
-                                                                                        log = {
-                                                                                            "Cтатус": sta,
-                                                                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                            "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                            "File": 'data'+(startIndex+parIndex),
-                                                                                            "Уровень": "2. статьи"
-                                                                                        }
-                                                                                        require('fs').appendFileSync(`./${logsDir}/otherCode.log`, JSON.stringify(log, null, 4));
-                                                                                    }
-                                                                                    // в лог
-                
-                // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
-                if(url.indexOf('https://its.1c.ru') === -1) {
-                    sta = "Э бля, это не https://its.1c.ru"
-                                                                                       // в лог otherDomain
-                                                                                       log = {
-                                                                                           "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                           "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                           "File": 'data'+(startIndex+parIndex),
-                                                                                           "Уровень": "2. статьи"
-                                                                                       }
-                                                                                       require('fs').appendFileSync(`./${logsDir}/otherDomain.log`, JSON.stringify(log, null, 4));
-                                                                                   
-                                                                                    // в лог
+
+                if(stop) {
+                    console.log("COPY (((((");
+                    continue;
                 }
-                level2responses.push(level2response.body)
-                level2codes.push(sta)
 
-                cohesion[index] = {};
-                cohesion[index].title = ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251") ;
-                cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
-                cohesion[index].content = ic.decode(Buffer('' + antiscript(level2response.body), 'binary'), "win1251");
-                cohesion[index].versions = [];
-                cohesion[index].status = level2response.status;
-                                                                                                // в лог emptyContent
-                                                                                                if (cohesion[index].content == "") {
-                                                                                                    log = {
-                                                                                                       "Ошибка": "Статья пустая ёпта",
-                                                                                                       "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                       "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                                       "File": 'data'+(startIndex+parIndex),
-                                                                                                       "Уровень": "2. Статьи"
-                                                                                                   }
-                                                                                                   require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
-                                                                                                }
-                                                                                                // в лог
-                                                                                                // в лог titleError
-                                                                                                if (level2titles[index] === null || level2titles[index] === undefined || level2titles[index] == '' || level2titles[index] === "undefined") {
-                                                                                                    log = {
-                                                                                                       "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                       "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                                       "File": 'data'+(startIndex+parIndex),
-                                                                                                       "Уровень": "2. Статьи"
-                                                                                                   }
-                                                                                                   require('fs').appendFileSync(`./${logsDir}/titleError.log`, JSON.stringify(log, null, 4));
-                                                                                                }
-                                                                                                // в лог
-                                                                                                 
-            }
-            catch(error) {
-                                                                                            // в лог ERROR
-                                                                                            log = {
-                                                                                                "Ошибка": error,
-                                                                                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                "Title": ic.decode(Buffer('' + level2titles[index], 'binary'), "win1251"),
-                                                                                                "File": 'data'+(startIndex+parIndex),
-                                                                                                "Уровень": "2. статьи"
-                                                                                            }
-                                                                                            require('fs').appendFileSync(`./${logsDir}/ERROR.log`, JSON.stringify(log, null, 4));
-                                                                                            // в лог
-                console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
-                continue
-            }
+                sets[i].add(url);
 
-            // третий уровень для мужыков
-            const soup3 = new JSSoup(level2response.body);
-            const liList3 = soup3.findAll('li')
-            const level3titles = []
-            const level3links = []
-            const level3codes = []
-            const level3responses = []
-
-            for (const [ind, li] of liList3.entries()) {
-                let level3link = ""
-                let a = li.find('A')
-                if(!a) {
-                    a = li.find('a')
-                }
-                if (a && a.attrs && a.attrs.href &&
-                    (ROOT_URL + a.attrs.href)
-                        .indexOf(level2links[index]
-                        .split('.htm')[0] + '_') !== -1
-                    ) {
-                    if (a.attrs.href.indexOf('download') !== -1) continue
-                    if  (a.attrs.href.indexOf('http') === -1) {
-                        level3link = ROOT_URL + a.attrs.href
+                if(!level2uniquelinks.has(url.split('?')[0])) {
+                    level2uniquelinks.add(url.split('?')[0]);
+                    isrepeatedlevel2link[url.split('?')[0]] = {
+                        index: index,
+                        firstData: 'data'+parIndex,
+                        title: ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                        url: ic.decode(Buffer('' + url, 'binary'), "win1251"),
                     }
-                    else {
-                        level3link = a.attrs.href
-                    }
-                    level3titles.push(a.contents[0]._text)
-                    level3links.push(level3link)
+                } else {
+                    console.log("!!!!!!!!!!!! КОПИЯ !!!!!!!!!!!!!!")
+                    cohesion[index] = {};
+                    cohesion[index].title = ic.decode(Buffer('' + antidate(level2titles[index+i*size]), 'binary'), "win1251") ;
+                    cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
+                    cohesion[index].repeated = isrepeatedlevel2link[url.split('?')[0]] || "repeated";
+                    cohesion[index].content ='';
+                    cohesion[index].versions = [];
+                    cohesion[index].status = 200;
+                    continue;
                 }
-            }
-
-            for (const [ind, url] of level3links.entries()) {
                 try {
-                    level3response = await new Promise((resolve, reject) => {
+                    level2response = await new Promise((resolve, reject) => {
                         request.post(
                         {
                             url: url,
@@ -609,106 +501,350 @@ const main = async () => {
                             }
                             //выводим в консоль инфу со статусом
                             console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
-                                        `--- Content ${ind+1}/${level3links.length} fetched ${url} with ${response.statusCode}`)
-                            const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                                        `-- Content ${index+i*size+1}/${amountOfLinks} fetched ${url} with ${response.statusCode}`)
                             resolve({
                                 response,
-                                body: title,
+                                body: body,
                                 status: response.statusCode,
                             })
                         });
                     });
-                    let sta = level3response.status
-                                                                                                    // в лог 301 302
-                                                                                                    if (sta === 302 || sta === 301) {
-                                                                                                        log = {
-                                                                                                            "Cтатус": sta,
-                                                                                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                            "Конечный url": "301 302 тут не обрабатывается",
-                                                                                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
-                                                                                                            "File": 'data'+(startIndex+parIndex),
-                                                                                                            "Уровень": "3. версии"
-                                                                                                        }
-                                                                                                        require('fs').appendFileSync(`./${logsDir}/${sta}fail.log`, JSON.stringify(log, null, 4));
-                                                                                                    } 
-                                                                                                    else if (sta === 404 || sta === 401) {
-                                                                                                        log = {
-                                                                                                            "Cтатус": sta,
-                                                                                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
-                                                                                                            "File": 'data'+(startIndex+parIndex),
-                                                                                                            "Уровень": "3. версии"
-                                                                                                        }
-                                                                                                        require('fs').appendFileSync(`./${logsDir}/${sta}.log`, JSON.stringify(log, null, 4));
-                                                                                                    }
-                                                                                                    else if (sta !== 200) {
-                                                                                                        log = {
-                                                                                                            "Cтатус": sta,
-                                                                                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
-                                                                                                            "File": 'data'+(startIndex+parIndex),
-                                                                                                            "Уровень": "3. версии"
-                                                                                                        }
-                                                                                                        require('fs').appendFileSync(`./${logsDir}/otherCode.log`, JSON.stringify(log, null, 4));
-                                                                                                    }
-                                                                                                    // в лог
+                    let sta = level2response.status
+                                                                                        // в лог 301 302
+                                                                                        if (sta === 302 || sta === 301) {
+                                                                                            log = {
+                                                                                                "Cтатус": sta,
+                                                                                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                "Конечный url": "301 302 тут не обрабатывается",
+                                                                                                "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                                "File": 'data'+(startIndex+parIndex),
+                                                                                                "Уровень": "2. статьи"
+                                                                                            }
+                                                                                            require('fs').appendFileSync(`./${logsDir}/${sta}fail.log`, JSON.stringify(log, null, 4));
+                                                                                        }
+                                                                                        else if (sta === 404 || sta === 401) {
+                                                                                            log = {
+                                                                                                "Cтатус": sta,
+                                                                                                "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                                "File": 'data'+(startIndex+parIndex),
+                                                                                                "Уровень": "2. статьи"
+                                                                                            }
+                                                                                            require('fs').appendFileSync(`./${logsDir}/${sta}.log`, JSON.stringify(log, null, 4));
+                                                                                        }
+                                                                                        else if (sta !== 200) {
+                                                                                            log = {
+                                                                                                "Cтатус": sta,
+                                                                                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                                "File": 'data'+(startIndex+parIndex),
+                                                                                                "Уровень": "2. статьи"
+                                                                                            }
+                                                                                            require('fs').appendFileSync(`./${logsDir}/otherCode.log`, JSON.stringify(log, null, 4));
+                                                                                        }
+                                                                                        // в лог
                     
                     // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
                     if(url.indexOf('https://its.1c.ru') === -1) {
-                        sta = "Э бля, это не https://its.1c.ru"
-                                                                                                    // в лог otherDomain
+                        sta = 800
+                                                                                           // в лог otherDomain
+                                                                                           log = {
+                                                                                               "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                               "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                               "File": 'data'+(startIndex+parIndex),
+                                                                                               "Уровень": "2. статьи"
+                                                                                           }
+                                                                                           require('fs').appendFileSync(`./${logsDir}/otherDomain.log`, JSON.stringify(log, null, 4));
+                                                                                       
+                                                                                        // в лог
+                    }
+                    level2responses.push(level2response.body)
+                    level2codes.push(sta)
+    
+                    cohesion[index] = {};
+                    cohesion[index].title = ic.decode(Buffer('' + antidate(level2titles[index+i*size]), 'binary'), "win1251") ;
+                    cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
+                    cohesion[index].content = ic.decode(Buffer('' + antiImg(antiscript(level2response.body),level2links[index]), 'binary'), "win1251");
+                    cohesion[index].versions = [];
+                    
+                    cohesion[index].repeated = {
+                        index: 0,
+                        firstData: '',
+                        title: '',
+                        url: '',
+                    }
+                    cohesion[index].status = level2response.status;
+                                                                                                    // в лог emptyContent
+                                                                                                    if (cohesion[index].content == "") {
+                                                                                                        log = {
+                                                                                                           "Ошибка": "Статья пустая ёпта",
+                                                                                                           "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                           "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                                           "File": 'data'+(startIndex+parIndex),
+                                                                                                           "Уровень": "2. Статьи"
+                                                                                                       }
+                                                                                                       require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
+                                                                                                    }
+                                                                                                    // в лог
+                                                                                                    // в лог titleError
+                                                                                                    if (level2titles[index+i*size] === null || level2titles[index+i*size] === undefined || level2titles[index+i*size] == '' || level2titles[index+i*size] === "undefined") {
+                                                                                                        log = {
+                                                                                                           "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                           "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                                           "File": 'data'+(startIndex+parIndex),
+                                                                                                           "Уровень": "2. Статьи"
+                                                                                                       }
+                                                                                                       require('fs').appendFileSync(`./${logsDir}/titleError.log`, JSON.stringify(log, null, 4));
+                                                                                                    }
+                                                                                                    // в лог
+                                                                                                     
+                }
+                catch(error) {
+                                                                                                // в лог ERROR
+                                                                                                log = {
+                                                                                                    "Ошибка": error,
+                                                                                                    "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                                                                                    "File": 'data'+(startIndex+parIndex),
+                                                                                                    "Уровень": "2. статьи"
+                                                                                                }
+                                                                                                require('fs').appendFileSync(`./${logsDir}/ERROR.log`, JSON.stringify(log, null, 4));
+                                                                                                // в лог
+                    console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
+                    continue
+                }
+    
+                // третий уровень для мужыков
+                const soup3 = new JSSoup(level2response.body);
+                const liList3 = soup3.findAll('li')
+                const level3titles = []
+                const level3links = []
+                const level3codes = []
+                const level3responses = []
+    
+                if(liList3)
+                for (const [ind, li] of liList3.entries()) {
+                    let level3link = ""
+                    let a = li.find('A')
+                    if(!a) {
+                        a = li.find('a')
+                    }
+                    if (a && a.attrs && a.attrs.href &&
+                        (ROOT_URL + a.attrs.href)
+                            .indexOf(level2links[index]
+                            .split('.htm')[0] + '_') !== -1
+                        ) {
+                        if (a.attrs.href.indexOf('download') !== -1) continue
+                        if  (a.attrs.href.indexOf('http') === -1) {
+                            level3link = ROOT_URL + a.attrs.href
+                        }
+                        else {
+                            level3link = a.attrs.href
+                        }
+                        level3titles.push(a.contents[0]._text)
+                        level3links.push(level3link)
+                    }
+                }
+    
+                if(level3links.length === 0) 
+                cohesion[index].versions.push(
+                    {
+                        title: ic.decode(Buffer('' + antidate(level2titles[index+i*size]), 'binary'), "win1251"),
+                        link: ic.decode(Buffer('' + level2links[index], 'binary'), "win1251"),
+                        content: ic.decode(Buffer('' + antiImg(antiscript(level2response.body),level2links[index]), 'binary'), "win1251"),
+                        status: level2response.status,
+                    }
+                )
+    
+                if(level3links)
+                for (const [ind, url] of level3links.entries()) {
+                    try {
+                        level3response = await new Promise((resolve, reject) => {
+                            request.post(
+                            {
+                                url: url,
+                                jar: j,
+                                gzip: true,
+                                encoding: 'binary',
+                                headers: {
+                                    "Content-Type": "text/html; charset=Windows-1251",
+                                    "Content-Encoding": "gzip",
+                                    'transfer-encoding': 'chunked',
+                                  }
+                            } , (err, response, body) => {
+                                if (err){
+                                    reject(err)
+                                    return
+                                }
+                                //выводим в консоль инфу со статусом
+                                console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
+                                            `--- Content ${ind+1}/${level3links.length} fetched ${url} with ${response.statusCode}`)
+                                const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                                resolve({
+                                    response,
+                                    body: title,
+                                    status: response.statusCode,
+                                })
+                            });
+                        });
+                        let sta = level3response.status
+                                                                                                        // в лог 301 302
+                                                                                                        if (sta === 302 || sta === 301) {
+                                                                                                            log = {
+                                                                                                                "Cтатус": sta,
+                                                                                                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                                "Конечный url": "301 302 тут не обрабатывается",
+                                                                                                                "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                                                                                                "File": 'data'+(startIndex+parIndex),
+                                                                                                                "Уровень": "3. версии"
+                                                                                                            }
+                                                                                                            require('fs').appendFileSync(`./${logsDir}/${sta}fail.log`, JSON.stringify(log, null, 4));
+                                                                                                        } 
+                                                                                                        else if (sta === 404 || sta === 401) {
+                                                                                                            log = {
+                                                                                                                "Cтатус": sta,
+                                                                                                                "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                                "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                                                                                                "File": 'data'+(startIndex+parIndex),
+                                                                                                                "Уровень": "3. версии"
+                                                                                                            }
+                                                                                                            require('fs').appendFileSync(`./${logsDir}/${sta}.log`, JSON.stringify(log, null, 4));
+                                                                                                        }
+                                                                                                        else if (sta !== 200) {
+                                                                                                            log = {
+                                                                                                                "Cтатус": sta,
+                                                                                                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                                "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                                                                                                "File": 'data'+(startIndex+parIndex),
+                                                                                                                "Уровень": "3. версии"
+                                                                                                            }
+                                                                                                            require('fs').appendFileSync(`./${logsDir}/otherCode.log`, JSON.stringify(log, null, 4));
+                                                                                                        }
+                                                                                                        // в лог
+                        
+                        // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
+                        if(url.indexOf('https://its.1c.ru') === -1) {
+                            sta = 800
+                                                                                                        // в лог otherDomain
+                                                                                                            log = {
+                                                                                                               "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                               "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                                                                                               "File": 'data'+(startIndex+parIndex),
+                                                                                                               "Уровень": "3. версии"
+                                                                                                           }
+                                                                                                           require('fs').appendFileSync(`./${logsDir}/otherDomain.log`, JSON.stringify(log, null, 4));
+                                                                                                        
+                                                                                                        // в лог
+                        }
+                        level3responses.push(level3response.body)
+                        level3codes.push(sta)
+    
+                        cohesion[index].versions.push({
+                            title: ic.decode(Buffer('' + antidate(level3titles[ind]), 'binary'), "win1251"),
+                            link: ic.decode(Buffer('' + level3links[ind], 'binary'), "win1251"),
+                            content: ic.decode(Buffer('' + antiImg(antiscript(level3response.body),level3links[ind]), 'binary'), "win1251"),
+                            status: level3response.status,
+                        })
+                        
+                                                                                                    // в лог titleError
+                                                                                                    if (level3titles[ind] === null || level3titles[ind] === undefined || level3titles[ind] == '' || level3titles[ind] === "undefined") {
                                                                                                         log = {
                                                                                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
                                                                                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
                                                                                                            "File": 'data'+(startIndex+parIndex),
                                                                                                            "Уровень": "3. версии"
                                                                                                        }
-                                                                                                       require('fs').appendFileSync(`./${logsDir}/otherDomain.log`, JSON.stringify(log, null, 4));
-                                                                                                    
+                                                                                                       require('fs').appendFileSync(`./${logsDir}/titleError.log`, JSON.stringify(log, null, 4));
+                                                                                                    }
                                                                                                     // в лог
                     }
-                    level3responses.push(level3response.body)
-                    level3codes.push(sta)
-
-                    cohesion[index].versions.push({
-                        title: ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
-                        link: ic.decode(Buffer('' + level3links[ind], 'binary'), "win1251"),
-                        content: antiscript(level3response.body),
-                        status: level3response.status,
-                    })
-                    
-                                                                                                // в лог titleError
-                                                                                                if (level3titles[ind] === null || level3titles[ind] === undefined || level3titles[ind] == '' || level3titles[ind] === "undefined") {
-                                                                                                    log = {
-                                                                                                       "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                       "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
-                                                                                                       "File": 'data'+(startIndex+parIndex),
-                                                                                                       "Уровень": "3. версии"
-                                                                                                   }
-                                                                                                   require('fs').appendFileSync(`./${logsDir}/titleError.log`, JSON.stringify(log, null, 4));
-                                                                                                }
-                                                                                                // в лог
-                }
-                catch(error) {
-                                                                                                    // в лог ERROR
-                                                                                                    log = {
-                                                                                                        "Ошибка": error,
-                                                                                                        "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                                                                                        "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
-                                                                                                        "File": 'data'+(startIndex+parIndex),
-                                                                                                        "Уровень": "3. версии"
-                                                                                                    }
-                                                                                                    require('fs').appendFileSync(`./${logsDir}/ERROR.log`, JSON.stringify(log, null, 4));
-                                                                                                    // в лог
-                    console.log('\x1b[31m--- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
-                    continue
+                    catch(error) {
+                                                                                                        // в лог ERROR
+                                                                                                        log = {
+                                                                                                            "Ошибка": error,
+                                                                                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                                                                                            "File": 'data'+(startIndex+parIndex),
+                                                                                                            "Уровень": "3. версии"
+                                                                                                        }
+                                                                                                        require('fs').appendFileSync(`./${logsDir}/ERROR.log`, JSON.stringify(log, null, 4));
+                                                                                                        // в лог
+                        console.log('\x1b[31m--- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
+                        continue
+                    }
                 }
             }
+            // for
+            if(repeatingLinks_.linkFirstMention === undefined)
+        repeatingLinks_ = {
+            linkFirstMention: '',
+            titleFirstMention: '',
+            data: ``
         }
+        const results = {
+            'title': ic.decode(Buffer('' + antidate(l1title), 'binary'), "win1251"),
+            'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
+            'status': status,
+            'pageWithoutContents': antiImg(antiscript(pageWithoutContents),url),
+            'repeated': level2uniquefirstlink.has(level2links[0]),
+            'repeatingLinks': repeatingLinks_,
+            'folder': 'data'+(startIndex+index+i*size),
+           // 'contents': cohesion - не удалять
+        }
+                                                                                /*     // в лог titleError
+                                                                                    if (l1title === null || l1title === undefined || l1title == '' || l1title === "undefined") {
+                                                                                        log = {
+                                                                                           "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                           "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+                                                                                           "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                                                                                           "File": 'data'+(startIndex+index+i*size),
+                                                                                           "Уровень": "1. разделы"
+                                                                                       }
+                                                                                       require('fs').appendFileSync(`./${logsDir}/titleError.log`, JSON.stringify(log, null, 4));
+                                                                                    }
+                                                                                    // в лог */
 
-        let repeatingLinks_ = {}
-        let isrepeatingRazd = false;
-        if(level2links[0] && level2uniquefirstlink.has(level2links[0])) {
+        // добавляем уникальную хуйню. has не трогать!
+        if(level2links[0] && !level2uniquefirstlink.has(level2links[0])) {
+            level2uniquefirstlink.add(level2links[0]);
+            let lnk = level2links[0];
+            repeatingLinks[lnk] = {
+                linkFirstMention: ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                titleFirstMention: ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                data: `./dumps/data${index+i*size}.json`
+            }
+        }
+            if (cohesion.length > 0) results.contents = true
+            else {
+                results.contents = false
+                                                                                  /*                // в лог emptyContent
+                                                                                                 log = {
+                                                                                                     "Ошибка": "У раздела нет ссылок (статей)? видимо нет",
+                                                                                                     "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                                                                                     "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+                                                                                                     "Title": ic.decode(Buffer('' + level1titles[index+i*size], 'binary'), "win1251"),
+                                                                                                     "File": 'data'+(startIndex+index+i*size),
+                                                                                                     "Уровень": "1. разделы"
+                                                                                                 }
+                                                                                                 if (!isrepeatingRazd) require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
+                                                                                                 // в лог */
+            }
+
+            
+            if (!require('fs').existsSync('./dumps/data'+(startIndex+parIndex))) {
+                require('fs').mkdirSync('./dumps/data'+(startIndex+parIndex));
+            }
+
+            require('fs').writeFileSync(`./dumps/data${+startIndex+parIndex}.json`, JSON.stringify(results, null, 4));
+
+            cohesion.forEach((coh,ii) => {
+                console.log(ii);
+                require('fs').writeFileSync(`./dumps/data${+startIndex+parIndex}/data${+startIndex+parIndex}_${ii+i*size}.json`, JSON.stringify(coh, null, 4));
+            })
+        }
+        }
+        else {
+            if(level2links[0] && level2uniquefirstlink.has(level2links[0])) {
             isrepeatingRazd = true
             repeatingLinks_ = repeatingLinks[level2links[0]]
                                                                             // в лог repeated
@@ -723,28 +859,34 @@ const main = async () => {
                                                                               require('fs').appendFileSync(`./${logsDir}/repeated.log`, JSON.stringify(log, null, 4));
                                                                             // в лог
         }
-
+        if(repeatingLinks_.linkFirstMention === undefined)
+        repeatingLinks_ = {
+            linkFirstMention: '',
+            titleFirstMention: '',
+            data: ``
+        }
         const results = {
-            'title': ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+            'title': ic.decode(Buffer('' + antidate(l1title), 'binary'), "win1251"),
             'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
             'status': status,
-            'pageWithoutContents': antiscript(pageWithoutContents),
+            'pageWithoutContents': antiImg(antiscript(pageWithoutContents),url),
             'repeated': level2uniquefirstlink.has(level2links[0]),
             'repeatingLinks': repeatingLinks_,
+            'folder': 'data'+(startIndex+index),
            // 'contents': cohesion - не удалять
         }
-                                                                                    // в лог titleError
+                                                                                /*     // в лог titleError
                                                                                     if (l1title === null || l1title === undefined || l1title == '' || l1title === "undefined") {
                                                                                         log = {
                                                                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
                                                                                            "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
                                                                                            "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
-                                                                                           "File": 'data'+(startIndex+index),
+                                                                                           "File": 'data'+(startIndex+index+i*size),
                                                                                            "Уровень": "1. разделы"
                                                                                        }
                                                                                        require('fs').appendFileSync(`./${logsDir}/titleError.log`, JSON.stringify(log, null, 4));
                                                                                     }
-                                                                                    // в лог
+                                                                                    // в лог */
 
         // добавляем уникальную хуйню. has не трогать!
         if(level2links[0] && !level2uniquefirstlink.has(level2links[0])) {
@@ -756,241 +898,161 @@ const main = async () => {
                 data: `./dumps/data${index}.json`
             }
         }
-
-        // пока не удалять
-        /*if (level2links.length < 500)
-            require('fs').writeFileSync(`./dumps/data${index}.json`, JSON.stringify(results, null, 4));
-        else {*/
-            if (cohesion.length > 0) results.contents = "СМОТРИ ДОЧЕРНИЕ ФАЙЛЫ!"
+            if (cohesion.length > 0) results.contents = true
             else {
-                results.contents = "ПУСТО"
-                                                                                                 // в лог emptyContent
+                results.contents = false
+                                                                                  /*                // в лог emptyContent
                                                                                                  log = {
                                                                                                      "Ошибка": "У раздела нет ссылок (статей)? видимо нет",
                                                                                                      "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
                                                                                                      "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                                                                                                     "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
-                                                                                                     "File": 'data'+(startIndex+index),
+                                                                                                     "Title": ic.decode(Buffer('' + level1titles[index+i*size], 'binary'), "win1251"),
+                                                                                                     "File": 'data'+(startIndex+index+i*size),
                                                                                                      "Уровень": "1. разделы"
                                                                                                  }
-                                                                                                 let hdoc_ = ic.decode(Buffer('' + curURL, 'binary'), "win1251")
-                                                                                                 let hdoc = (hdoc_.slice(-5) === '/hdoc' || hdoc_.slice(-6) === '/hdoc/')
-                                                                                                 if (!isrepeatingRazd && !isOtherUrl && !hdoc) require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
-                                                                                                 // в лог
+                                                                                                 if (!isrepeatingRazd) require('fs').appendFileSync(`./${logsDir}/emptyContent.log`, JSON.stringify(log, null, 4));
+                                                                                                 // в лог */
             }
-            require('fs').writeFileSync(`./dumps/data${startIndex+index}.json`, JSON.stringify(results, null, 4));
 
-            let i = 0;
-            for(; i < level2links.length/300 - 1; i++) {
-                let removed = cohesion.splice(0, 300);
-                require('fs').appendFileSync(`./dumps/data${startIndex+index}_${i}.json`, JSON.stringify(removed, null, 4));
-            }
-            if (cohesion.length > 0) require('fs').appendFileSync(`./dumps/data${startIndex+index}_${i}.json`, JSON.stringify(cohesion, null, 4));
             
-            /* ВОЗМОЖНО, НО НЕ СЕГОДНЯ 
-            require('fs').writeFileSync(`./dumps/data${index}.json`, 
-            `{
-                'title': ${ic.decode(Buffer('' + l1title, 'binary'), "win1251")},
-                'link': ${ic.decode(Buffer('' + url, 'binary'), "win1251")},
-                'status': ${status},
-                'pageWithoutContents': ${JSON.stringify(pageWithoutContents, null, 4)},
-                'repeated': ${level2uniquefirstlink.has(level2links[0])},
-                'repeatingLinks': ${JSON.stringify(repeatingLinks_, null, 4)},
-                'contents': [`);
-            for(let i = 0; i < 2; i++) {
-                let removed = cohesion.splice(0, 1500);
-                require('fs').appendFileSync(`./dumps/data${index}.json`, JSON.stringify(removed, null, 4));
+            if (!require('fs').existsSync('./dumps/data'+(startIndex+parIndex))) {
+                require('fs').mkdirSync('./dumps/data'+(startIndex+parIndex));
             }
-            require('fs').appendFileSync(`./dumps/data${index}.json`, JSON.stringify(cohesion, null, 4));
-            require('fs').appendFileSync(`./dumps/data${index}.json`, 
-            `]}`); */
-        //}
+
+            require('fs').writeFileSync(`./dumps/data${+startIndex+parIndex}.json`, JSON.stringify(results, null, 4));
+
+            cohesion.forEach((coh,i) => {
+                console.log(i);
+                require('fs').writeFileSync(`./dumps/data${+startIndex+parIndex}/data${+startIndex+parIndex}_${i}.json`, JSON.stringify(coh, null, 4));
+            })
+    }
+        
+
     }
 }
 
     main();
 
 
-    // всё
 
-    // далее шлак, который может пригодится
-/*
-    // `tress` последовательно вызывает обработчик для каждой ссылки в очереди
-    var q = tress(function(url, callback){
-        // вот наш волшебный request, который умеет в куки и гзип сжатие.
-        // Хз пока как он себя поведет если будет парсить страницу без зжатия gqip. Не проверял.
-        request.post(
-        {
-            url: url,
-            jar: j,
-            gzip: true,
-            encoding: 'binary',
-            headers: {
-                "Content-Type": "text/html; charset=Windows-1251",
-                "Content-Encoding": "gzip",
-                'transfer-encoding': 'chunked',
-              }
-        } , (err, response, body) => {
-            if (err){
-                console.log('\x1b[31mЭй ёпта! Чел, ERROR! %s\x1b[0m', e)
-                return
+let postpost = async function (lis, count, log) {
+    return await new Promise(async(resolve, reject) => {
+    if (count > 320) {
+        resolve([])
+        return
+    }
+    console.log('\x1b[34mcount = %s\x1b[0m', count)
+
+    let returnList = []
+
+    let level1links = []
+
+    if(lis)
+    for (const [index, li] of lis.entries()) {
+        try {
+        if(li.attrs && li.attrs.class && li.attrs.class.indexOf('icon0') !== -1) {
+            returnList.push(li)
+        }
+        else {
+            let level1link = ""
+            let a = li.find('a')
+            if (a.attrs && a.attrs.href) {
+                if  (a.attrs.href.indexOf('http') === -1) {
+                    level1link = ROOT_URL + a.attrs.href
+                }
+                else {
+                    level1link = a.attrs.href
+                }
             }
+            level1links.push(level1link)
+        }
+    }
+    catch(error) {
+        // в лог recursion
+        log = {
+            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+            "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+            "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+            "File": 'data'+(startIndex+index),
+            "Уровень": "1. разделы",
+            "Error": error
+        }
+        require('fs').appendFileSync(`./${logsDir}/recursionError.log`, JSON.stringify(log, null, 4));
 
-
-
-            // Декодируем в утф
-            let title = ic.decode(Buffer(body, 'binary'), "win1251");
-            // Хуярим в результаты. строку из статус кода и результата
-            results.push(response.statusCode + ': ' + title);
-            // вызываем callback в конце. О да, колбек. люблю его
-
-            callback();
-        });
-    });
-
-    q.drain = function(){
-        //require('fs').writeFileSync('./data.json', JSON.stringify(results, null, 4));
+        continue
+    }
     }
 
-    level1links.forEach( (url) => {
-        q.push(url);
-    });
+    let level1response;
+    if(level1links)
+    for (const [index, url] of level1links.entries()) {
+        if(url.indexOf('https://its.1c.ru') === -1 || LINKS.has(url)) {
+            console.log('ПОВТОР ИЛИ НЕДОМЕН');
+            continue;
+    }
+        LINKS.add(url);
+        console.log(count + ') ' + index + '/' + level1links.length, url);
+    try {
+        level1response = await new Promise((res, rej) => {
+            request.post(
+            {
+                url: url,
+                jar: j,
+                gzip: true,
+                encoding: 'binary',
+                headers: {
+                    "Content-Type": "text/html; charset=Windows-1251",
+                    "Content-Encoding": "gzip",
+                    'transfer-encoding': 'chunked',
+                  }
+            } , (err, response, body) => {
+                if (err){
+                    reject(err)
+                    return
+                }
+                if(response.statusCode === 200)
+                res({
+                        response,
+                        body: body,
+                        status: response.statusCode,
+                    })
+                else {
+                    rej(err)
+                }
+            });
+        });
+    }
+    catch(error) {
+        // в лог recursion
+        log = {
+            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+            "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+            "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+            "File": 'data'+(startIndex+index),
+            "Уровень": "1. разделы",
+            "Error": error
+        }
+        require('fs').appendFileSync(`./${logsDir}/recursionError.log`, JSON.stringify(log, null, 4));
+
+        continue
+    }
+    let listlist = await postpost(new JSSoup(level1response.body).findAll('li').filter(li => {
+        if (li.attrs && li.attrs.class) {
+            return li.attrs.class.indexOf('folder') !== -1 || li.attrs.class.indexOf('icon0') !== -1
+        }
+        else {
+            return false
+        }
+    }), count+1, log)
+    if(listlist) returnList = [...returnList, ...listlist]
 }
-
-
-*/
-/*
-
-
-
-const data = {
-    'openid.auth.check':	'true',
-    'openid.auth.pwd':	P,
-    'openid.auth.short':	'false',
-    'openid.auth.user':	U,
-    'openid.claimed_id':	'http://specs.openid.net/auth/2.0/identifier_select',
-    'openid.identity':	'http://specs.openid.net/auth/2.0/identifier_select',
-    'openid.mode':	'checkid_immediate',
-    'openid.ns':	'http://specs.openid.net/auth/2.0',
-    'openid.realm':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh',
-    'openid.return_to':	'https://its.1c.ru/login/?action=afterlogin&provider=fresh&backurl=%2Fsection%2Fall'
-};
-
-
-
-
-
-
-const cookies =
-    'BITRIX_SM_LOGIN=partweb;'+
-    'PHPSESSID='+PHPSESSID+';'+
-    'SUBSCRIBE_PERIOD=31.12.2018;'+
-    'USER_TYPE=:1:2:20:21:25:203:801:;'+
-    'PARTWEB_LOGIN='+U+';';
-*/
-
-
-
-
-
-/*
-lislis.forEach((lll) => {
-    console.log(ic.decode(Buffer('' + lll.find('a').contents[0]._text, 'binary'), "win1251"))
-})
-*/
-
-
-
-let postpost = async function (lis, count) {
-        if (count > 10) {
-            return []
-        }
-        console.log('\x1b[34mcount = %s\x1b[0m', count)
-
-        let returnList = []
-
-        let level1links = []
-        let level1list = []
-        for (const [index, li] of lis.entries()) {
-            console.log(ic.decode(Buffer('' + li.find('a').contents[0]._text, 'binary'), "win1251"))
-            try {
-                if(li.attrs && li.attrs.class && li.attrs.class.indexOf('icon0') !== -1) {
-                    returnList.push(li)
-                }
-                else if (li.attrs && li.attrs.class && li.attrs.class.indexOf('folder') !== -1) {
-                    let level1link = ""
-                    let a = li.find('a')    
-                    if (a.attrs && a.attrs.href) {
-                        if  (a.attrs.href.indexOf('http') === -1) {
-                            level1link = ROOT_URL + a.attrs.href
-                        }
-                        else {
-                            level1link = a.attrs.href
-                        }
-                    }
-                    level1links.push(level1link)
-                    level1list.push(a.contents[0]._text)
-                }
-            }
-            catch(error) {
-                continue
-            }
-        }
-
-        let level1response;
-        for (const [index, url] of level1links.entries()) {
-            try {
-                level1response = await new Promise((res, rej) => {
-                    request.post(
-                    {
-                        url: url,
-                        jar: j,
-                        gzip: true,
-                        encoding: 'binary',
-                        headers: {
-                            "Content-Type": "text/html; charset=Windows-1251",
-                            "Content-Encoding": "gzip",
-                            'transfer-encoding': 'chunked',
-                          }
-                    } , (err, response, body) => {
-                        if (err){
-                            reject(err)
-                            return
-                        }
-                        if(response.statusCode === 200)
-                        res({
-                                response,
-                                body: body,
-                                status: response.statusCode,
-                            })
-                        else {
-                            rej(err)
-                        }
-                    });
-                });
-            }
-            catch(error) {
-                continue
-            }
-
-            let lisliss = []
-            let qq = new JSSoup(level1response.body).findAll('li').reduce((accumulator, div) => {
-                if (div.attrs && div.attrs.class 
-                    && div.find('a') 
-                    && div.find('a').contents[0]._text === level1list[index]) {
-                    accumulator = [...accumulator, ...div.findAll('li')]
-                }
-                return accumulator
-            }, [])
-            let qqq = new JSSoup(level1response.body).findAll('li').filter(li => {
-                if(li.attrs && li.attrs.class) return li.attrs.class.indexOf('icon0') !== -1
-                else return false
-            })
-            lisliss = [...lisliss, ...qq, ...qqq]
-            listlist = await postpost(lisliss, count+1);
-            if(listlist && listlist[0]) returnList = [...returnList, ...listlist]
-        }
-        return  returnList;
+resolve(returnList);
+    }).then((arr) => {
+        return arr
+       })
+       .catch((err) => {
+        return []
+       });
 }
 
 
@@ -1010,12 +1072,65 @@ var antiscript = function(body) {
 } 
 
 var antinrt = function(body) {
-    let re = /(\r)|(\n)|(\t)/g;
-    let newstr = body.replace(re, '');
-    newstr = newstr.replace('<IMG', '<img').replace(/<!--\[if lt IE ?\]><!\[endif\]-->/,'');
+    let re = /[(\r)(\n)(\t)]+/g;
+    let newstr = body;//.replace(re, ' ');
+    newstr = newstr.replace('<IMG', '<img');
     return newstr;
 } 
 
+var antidate = function(title) {
+    let re = /^\d\d\.\d\d\.\d\d\d\d( |. )/;
+    let newstr = title.replace(re, '');
+    return newstr;
+} 
 
+var antiImg = (body, link) => {
+    
+    let lli = link + "/"
+    if(lli.lastIndexOf("/") === lli.length - 1) lli = lli.slice(0, lli.length - 1)
+    let indQ = lli.lastIndexOf("?")
+    if(~indQ) lli = lli.slice(0, indQ)
+    let indSl = lli.lastIndexOf("/")
+    if(~indSl) lli = lli.slice(0, indSl+1)
+
+    let path = lli.slice(ROOT_URL.length+1)
+
+    if (path.search(/[а-яА-ЯёЁ]/i) === -1) {
+        path = ic.decode(Buffer('' + path, 'binary'), "win1251")
+    }
+
+    // ./img/path/imgwithout..?
+
+    const reres = /<img[^>]*>/gi
+    const rere = /src[ ]*=[ ]*\"[^\"]*\"/i
+    const rer = /\"[^\"]*\"/
+
+    const t1 = body.match(reres);
+    if(t1)
+    for (const [index, img] of t1.entries()) {
+        console.log(img)
+        const src = img.match(rere)[0]
+        let imgPath = src.match(rer)[0]
+        if(imgPath.indexOf('mc.yandex.ru') !== -1) continue
+        if (imgPath.search(/[а-яА-ЯёЁ]/i) === -1) {
+            imgPath = ic.decode(Buffer('' + imgPath, 'binary'), "win1251")
+        }
+        imgPath = imgPath.slice(1, -1)
+        if (imgPath.indexOf('/') === 0) imgPath.slice(1)
+        if (imgPath.indexOf('./') === 0) imgPath.slice(2)
+        let q = imgPath.lastIndexOf('?')
+        if(~q) imgPath = imgPath.slice(0,q)
+        const normSrc = `src="http://media.4buttons.ru/img/${path}${imgPath}"`;
+
+        const newImg = img.replace(rere, normSrc);
+
+        let t = -1;  
+        body = body.replace(reres, function (match) {
+            t++;
+            return (t === index) ? newImg : match;
+        });
+    };
+    return body
+}
 
 // ну так уж и быть с др

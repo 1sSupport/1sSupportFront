@@ -254,6 +254,32 @@ const main = async () => {
         let listLevel2 = [...listLevel2_0, ...listLevel2_1, ...listLevel2_2, ...listLevel2_3, ...listLevel2_4]
 
 
+
+        if (listLevel2.length === 0 && curURL.indexOf('https://its.1c.ru') !== -1) {
+
+            const lis = soup2.findAll('div').reduce((accumulator, div) => {
+                if (div.attrs && div.attrs.id && div.attrs.id.indexOf('w_content')!== -1) {
+                    accumulator.push(div);
+                }
+                return accumulator
+            }, [])
+            let lislis = []
+            lis.forEach((li) => {
+                let qq = li.findAll('li').reduce((accumulator, div) => {
+                    if (div.attrs && div.attrs.class && div.find('a') && ic.decode(Buffer('' + div.find('a').contents[0]._text, 'binary'), "win1251") === "Содержание") {
+                        accumulator = [...accumulator, ...div.findAll('li')]
+                    }
+                    return accumulator
+                }, [])
+                lislis = [...lislis, ...qq]
+            })
+            listLevel2 = await postpost(lislis, 0, log);
+
+            listLevel2 = listLevel2.map(li => {
+                return li.find('a')
+            });
+        }
+
         const pagesCounter = listLevel2.length
         console.log('# listLevel2.length =', pagesCounter)
         const cohesion = []
@@ -495,6 +521,125 @@ const main = async () => {
 }
 
     main();
+
+
+
+let postpost = async function (lis, count, log) {
+    return await new Promise(async(resolve, reject) => {
+        if (count > 320) {
+            resolve([])
+            return
+        }
+        console.log('\x1b[34mcount = %s\x1b[0m', count)
+
+        let returnList = []
+
+        let level1links = []
+
+        if(lis)
+            for (const [index, li] of lis.entries()) {
+                try {
+                    if(li.attrs && li.attrs.class && li.attrs.class.indexOf('icon0') !== -1) {
+                        returnList.push(li)
+                    }
+                    else {
+                        let level1link = ""
+                        let a = li.find('a')
+                        if (a.attrs && a.attrs.href) {
+                            if  (a.attrs.href.indexOf('http') === -1) {
+                                level1link = ROOT_URL + a.attrs.href
+                            }
+                            else {
+                                level1link = a.attrs.href
+                            }
+                        }
+                        level1links.push(level1link)
+                    }
+                }
+                catch(error) {
+                    // в лог recursion
+                    log = {
+                        "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                        "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+                        "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                        "File": 'data'+(startIndex+index),
+                        "Уровень": "1. разделы",
+                        "Error": error
+                    }
+                    require('fs').appendFileSync(`./${logsDir}/recursionError.log`, JSON.stringify(log, null, 4));
+
+                    continue
+                }
+            }
+
+        let level1response;
+        if(level1links)
+            for (const [index, url] of level1links.entries()) {
+                console.log(count + ') ' + index + '/' + level1links.length, url);
+                try {
+                    level1response = await new Promise((res, rej) => {
+                        request.post(
+                            {
+                                url: url,
+                                jar: j,
+                                gzip: true,
+                                encoding: 'binary',
+                                headers: {
+                                    "Content-Type": "text/html; charset=Windows-1251",
+                                    "Content-Encoding": "gzip",
+                                    'transfer-encoding': 'chunked',
+                                }
+                            } , (err, response, body) => {
+                                if (err){
+                                    reject(err)
+                                    return
+                                }
+                                if(response.statusCode === 200)
+                                    res({
+                                        response,
+                                        body: body,
+                                        status: response.statusCode,
+                                    })
+                                else {
+                                    rej(err)
+                                }
+                            });
+                    });
+                }
+                catch(error) {
+                    // в лог recursion
+                    log = {
+                        "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                        "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
+                        "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                        "File": 'data'+(startIndex+index),
+                        "Уровень": "1. разделы",
+                        "Error": error
+                    }
+                    require('fs').appendFileSync(`./${logsDir}/recursionError.log`, JSON.stringify(log, null, 4));
+
+                    continue
+                }
+                let listlist = await postpost(new JSSoup(level1response.body).findAll('li').filter(li => {
+                    if (li.attrs && li.attrs.class) {
+                        return li.attrs.class.indexOf('folder') !== -1 || li.attrs.class.indexOf('icon0') !== -1
+                    }
+                    else {
+                        return false
+                    }
+                }), count+1, log)
+                if(listlist) returnList = [...returnList, ...listlist]
+            }
+        resolve(returnList);
+    }).then((arr) => {
+        return arr
+    })
+        .catch((err) => {
+            return []
+        });
+}
+
+
 
 var antiscript = function(body) {
     let bd = antinrt(body);

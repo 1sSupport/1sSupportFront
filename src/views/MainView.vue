@@ -66,7 +66,7 @@ export default {
     getMarks: async function(token) {
       let axiosConfig = {
         method: "get",
-        url: ServerAPIUrls.GET_ARTICLES_MARKS,
+        url: ServerAPIUrls.GET_POPULAR_ARTICLES,
         headers: {
           Authorization: "Bearer " + this.token
         },

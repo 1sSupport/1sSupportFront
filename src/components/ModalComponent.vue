@@ -38,8 +38,11 @@
                     color="#003399"
                     :append-icon="null"
                     :items="themes"
+                    :item-text="text"
+                    :item-value="id"
                     label="Тема обращения"
                     ref="theme"
+                    return-object
                     :rules="[() => !!theme || 'Пожалуйста, укажите тему обращения']"
                     :error-messages="errorMessages"
                     required
@@ -180,7 +183,7 @@
           data: {
             "contactdata": this.phone,
             "text": this.probl,
-            "title": this.theme
+            "titleId": this.theme.id
           }
         }
         var response = await axios(axiosConfig)

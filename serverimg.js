@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 // Взять из кукисов
-const PHPSESSID = 'hknaujkuman3o95k96rudsttd2'
+const PHPSESSID = '2hdg9f04g7bntvn4aacfu2fmc7'
 const ROOT_URL = 'https://its.1c.ru';
 const P = '7a31499e';
 const U = '54389-40';
@@ -26,6 +26,11 @@ const j = request.jar();
 const cookie = request.cookie(`PHPSESSID=${PHPSESSID}`);
 //const cookie = cookies;
 j.setCookie(cookie, ROOT_URL);
+
+const LINKS = new Set();
+var superindex = startIndex;
+var supercounter = 0;
+
 
 const main = async () => {
 
@@ -61,7 +66,7 @@ const main = async () => {
     let level1links = []
     // сюда будем класть названия разделов
     let level1titles = []
-    
+
     let level2uniquefirstlink = new Set();
 
     let repeatingLinks = {}
@@ -98,11 +103,12 @@ const main = async () => {
     console.log('# level1links.length =', level1links.length)
     console.log('# level1titles.length =', level1titles.length)
 
-    
+
     level1links.splice(0, startIndex);
     level1titles.splice(0, startIndex);
 
     for (const [index, url] of level1links.entries()) {
+        superindex = index + startIndex;
         let level2uniquelinks = new Set();
         let isrepeatedlevel2link = {};
         const l1title = level1titles[index];
@@ -179,12 +185,13 @@ const main = async () => {
         }
         const soup2 = new JSSoup(level1response.body);
         status = level1response.status;
+        console.log(`[${startIndex+index+1}]`);
         parseImg(soup2, curURL)
 
         // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
         if(curURL.indexOf('https://its.1c.ru') === -1) {
             status_img = "Это не https://its.1c.ru"
-        }   
+        }
         const dom2 = new JSDOM(level1response.body);
 
         const listLevel2_0 = soup2.findAll('li').reduce((accumulator, li) => {
@@ -274,6 +281,7 @@ const main = async () => {
                 lislis = [...lislis, ...qq]
             })
             listLevel2 = await postpost(lislis, 0, log);
+            LINKS.clear();
 
             listLevel2 = listLevel2.map(li => {
                 return li.find('a')
@@ -367,7 +375,7 @@ const main = async () => {
                     });
                 });
                 let sta = level2response.status
-                
+
                 // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
                 if(url.indexOf('https://its.1c.ru') === -1) {
                     status_img = "Это не https://its.1c.ru"
@@ -380,7 +388,7 @@ const main = async () => {
                 cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
                 cohesion[index].content = ic.decode(Buffer('' + antiscript(level2response.body), 'binary'), "win1251");
                 cohesion[index].versions = [];
-                cohesion[index].status = level2response.status;                                    
+                cohesion[index].status = level2response.status;
             }
             catch(error) {
                 console.log('\x1b[31m-- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
@@ -390,6 +398,7 @@ const main = async () => {
             // третий уровень для мужыков
             const soup3 = new JSSoup(level2response.body);
             const liList3 = soup3.findAll('li')
+            console.log(`[${startIndex+parIndex+1}]`);
             parseImg(soup3, url)
             const level3titles = []
             const level3links = []
@@ -450,7 +459,7 @@ const main = async () => {
                         });
                     });
                     let sta = level3response.status
-                    
+
                     // Заглушка для левых ссылок. Нужно посмотреть что там на самом деле будет.
                     if(url.indexOf('https://its.1c.ru') === -1) {
                         status_img = "Это не https://its.1c.ru"
@@ -469,6 +478,7 @@ const main = async () => {
                 catch(error) {
                     console.log('\x1b[31m--- Эй ёпта! Чел, ERROR! %s\x1b[0m', error)
                 }
+                console.log(`[${startIndex+parIndex+1}]`);
                 parseImg(new JSSoup(level3response.body), url)
             }
         }
@@ -502,7 +512,7 @@ const main = async () => {
 
 
 
-/* 
+/*
             if (cohesion.length > 0) results.contents = "СМОТРИ ДОЧЕРНИЕ ФАЙЛЫ!"
             else {
                 results.contents = "ПУСТО"
@@ -575,6 +585,11 @@ let postpost = async function (lis, count, log) {
         let level1response;
         if(level1links)
             for (const [index, url] of level1links.entries()) {
+                if(url.indexOf('https://its.1c.ru') === -1 || LINKS.has(url)) {
+                    console.log('ПОВТОР ИЛИ НЕДОМЕН');
+                    continue;
+                }
+                LINKS.add(url);
                 console.log(count + ') ' + index + '/' + level1links.length, url);
                 try {
                     level1response = await new Promise((res, rej) => {
@@ -644,32 +659,54 @@ let postpost = async function (lis, count, log) {
 var antiscript = function(body) {
     let bd = antinrt(body);
     return bd;
-} 
+}
 
 var antinrt = function(body) {
     let re = /(\r)|(\n)|(\t)/g;
     let newstr = body.replace(re, '');
     return newstr;
-} 
+}
 function createDirs(start, path){
     let arr = ic.decode(Buffer(path, 'binary'), "win1251").split("/")
     let st = start;
+    let stOld = start;
     arr.forEach((dir) => {
-        if (dir !== '' && !require('fs').existsSync(st+dir)) {
+        if (dir !== '..' && dir !== '' && !require('fs').existsSync(st+dir)) {
             require('fs').mkdirSync(st+dir);
         }
-        st = st+dir+'/'
+        if (dir === '..') {
+            st = stOld;
+        }else {
+            stOld = st;
+            st = st+dir+'/'
+        }
     })
 }
 
 function createImgDirs(start, path){
     let arr = ic.decode(Buffer(path, 'binary'), "win1251").split("/")
     let st = start
+    let stOld = start;
     let imgName = 'file'
     let imgPath = ''
     arr.forEach((dir, index) => {
         if (index !== arr.length-1 && !require('fs').existsSync(st+dir)) {
-            require('fs').mkdirSync(st+dir)
+            if (dir === '..' && dir !== '') {
+                console.log('!!!!!!!!' +st + dir)
+                require('fs').mkdirSync(st + dir)
+            }
+        }
+        if (dir === '..') {
+            st = stOld;
+        }else {
+            stOld = st;
+            st = st+dir+'/'
+        }
+    })
+     st = start
+     stOld = start;
+    arr.forEach((dir, index) => {
+        if (index !== arr.length-1 && !require('fs').existsSync(st+dir)) {
             imgPath = imgPath+dir+'/';
         }
         else if (index === arr.length-1) {
@@ -678,11 +715,17 @@ function createImgDirs(start, path){
         else {
             imgPath = imgPath+dir+'/';
         }
-        st = st+dir+'/'
+            st = st+dir+'/'
     })
     return {imgPath, imgName};
 }
+var setllimg = new Set();
+var indexold = startIndex;
 var parseImg = async (soup, link) => {
+    if(indexold !== superindex) {
+        indexold = superindex;
+        setllimg.clear();
+    }
     let img_src2 = []
     let img_src1 = []
     let img_src2_ = soup.findAll('IMG')
@@ -698,14 +741,23 @@ var parseImg = async (soup, link) => {
     if(~indSl) lli = lli.slice(0, indSl+1)
 
     let path = lli.slice(ROOT_URL.length+1)
-    createDirs("./img/", path)
+    
+    if (!require('fs').existsSync(`./img/${superindex}`)) {
+        require('fs').mkdirSync(`./img/${superindex}`);
+    }
+    //createDirs("./img/", path)
     for (const [index, src] of img_src.entries()) {
+        //if(~src.indexOf("mc.yandex")) continue;
+        //if(~src.indexOf("http")) continue;
+        //if(~src.indexOf(";")) continue;
+        //if(~path.indexOf("http")) continue;
+        //path = ic.decode(Buffer('' + path, 'binary'), "win1251");
         let {imgPath, imgName} = createImgDirs("./img/"+path, src)
         let llimg = lli+src
         console.log(llimg)
         try {
-            level1responseimg = await new Promise((resolve, reject) => {
-                request.post(
+            level1responseimg = await new Promise( (resolve, reject) => {
+                 request.post(
                 {
                     url: llimg,
                     jar: j,
@@ -722,7 +774,30 @@ var parseImg = async (soup, link) => {
                         return
                     }
                     console.log(`./img/${path}${imgName}`)
-                    request(llimg).pipe(require('fs').createWriteStream(`./img/${path}${imgPath}${imgName}`))
+                        if(~imgName.indexOf("."))
+                            console.error(imgName.lastIndexOf('.'))
+                        if(!setllimg.has(llimg)) {
+                            setllimg.add(llimg);
+                            console.log("!!!!!!!!!!")/*
+                            if (!(~((imgName.slice(-4)).indexOf(".")))) {
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.warn(`./img/${superindex}/${supercounter++}${imgName.slice(-4)}`)
+                                console.warn(imgName)
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                console.log("!!!!!!!!!!")
+                                return;
+                            }*/
+                            if(response.statusCode === 200 && ~((imgName.slice(-4)).indexOf(".")))
+                                request(llimg).pipe(require('fs').createWriteStream(`./img/${superindex}/${supercounter++}${imgName.slice(-4)}`))
+                        }
+                            //request(llimg).pipe(require('fs').createWriteStream(`./img/${ic.decode(Buffer('' + path, 'binary'), "win1251")}${imgPath}${imgName}`))
                     //выводим в консоль инфу со статусом
                     const title = ic.decode(Buffer(body, 'binary'), "win1251");
                     resolve({

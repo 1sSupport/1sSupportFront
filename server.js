@@ -12,12 +12,14 @@ const P = '801db464';
 const U = '49289-40';
 let log = {};
 
-const startIndex = 0; // Откудава стартовать будем? с нуля до 500 примерно
+let startIndex = 0; // Откудава стартовать будем? с нуля до 500 примерно
 const logsDir = "logs"; // Папка для логов
 
-console.log("start = ",startIndex)
 console.log("logDir = ",logsDir)
 
+var superindex = startIndex;
+var supercounter = 0;
+var startIndexRecursion = 0;
 
 const j = request.jar();
 // записываем в куки PHPSESSID
@@ -132,6 +134,8 @@ const main = async () => {
 
     if(level1links)
         for (const [index, url] of level1links.entries()) {
+            require('fs').writeFileSync(`./startindex.txt`, +index + startIndex);
+            superindex = +index + startIndex;
             let level2uniquelinks = new Set();
             let isrepeatedlevel2link = {};
             const l1title = level1titles[index];
@@ -447,7 +451,8 @@ const main = async () => {
                 }
                 for(const [i, level2links] of sublevel2links.entries()) {
                     console.log(process.memoryUsage());
-                    if(i<0)continue; // 34106
+                    if(i<startIndexRecursion)continue; // 34106
+                    require('fs').writeFileSync(`./startIndexRecursion.txt`, +i*size);
                     sets.push(new Set())
                     for (const [index, url] of level2links.entries()) {
 
@@ -931,7 +936,23 @@ const main = async () => {
         }
 }
 
-main();
+require('fs').readFile('./startindex.txt', 'utf8', function(err, contents) {
+    startIndex = +contents
+    console.log(startIndex)
+    superindex = startIndex
+    console.log("start = ",startIndex)
+
+    require('fs').readFile('./supercounter.txt', 'utf8', function(err, contents) {
+
+        supercounter = +contents
+
+        require('fs').readFile('./startIndexRecursion.txt', 'utf8', function(err, contents) {
+            startIndexRecursion = +contents;
+            main();
+        });
+    });
+});
+
 
 
 
@@ -1120,7 +1141,13 @@ var antiImg = (body, link) => {
             if (imgPath.indexOf('./') === 0) imgPath.slice(2)
             let q = imgPath.lastIndexOf('?')
             if(~q) imgPath = imgPath.slice(0,q)
-            const normSrc = `src="http://media.4buttons.ru/img/${path}${imgPath}"`;
+
+            let {imgPathhh, imgName} = createImgDirs("./img/"+path, src)
+
+            const newPath = `src="http://media.4buttons.ru/img/${superindex}/${supercounter++}${imgName.slice(-4)}`
+            if(!(supercounter%500)) require('fs').writeFileSync(`./supercounter.txt`, +supercounter);
+            const normSrc = newPath;
+           // const normSrc = `src="http://media.4buttons.ru/img/${path}${imgPath}"`;
 
             const newImg = img.replace(rere, normSrc);
 
@@ -1131,6 +1158,44 @@ var antiImg = (body, link) => {
             });
         };
     return body
+}
+
+
+function createImgDirs(start, path){
+    let arr = ic.decode(Buffer(path, 'binary'), "win1251").split("/")
+    let st = start
+    let stOld = start;
+    let imgName = 'file'
+    let imgPath = ''
+    arr.forEach((dir, index) => {
+        if (index !== arr.length-1 && !require('fs').existsSync(st+dir)) {
+            if (dir === '..' && dir !== '') {
+                console.log('!!!!!!!!' +st + dir)
+                require('fs').mkdirSync(st + dir)
+            }
+        }
+        if (dir === '..') {
+            st = stOld;
+        }else {
+            stOld = st;
+            st = st+dir+'/'
+        }
+    })
+    st = start
+    stOld = start;
+    arr.forEach((dir, index) => {
+        if (index !== arr.length-1 && !require('fs').existsSync(st+dir)) {
+            imgPath = imgPath+dir+'/';
+        }
+        else if (index === arr.length-1) {
+            imgName = dir.split("?")[0];
+        }
+        else {
+            imgPath = imgPath+dir+'/';
+        }
+        st = st+dir+'/'
+    })
+    return {imgPath, imgName};
 }
 
 // ну так уж и быть с др

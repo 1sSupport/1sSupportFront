@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 // Взять из кукисов
-const PHPSESSID = '2hdg9f04g7bntvn4aacfu2fmc7'
+const PHPSESSID = '0af33kpkvf6rk1hhec5fu08rp6'
 const ROOT_URL = 'https://its.1c.ru';
 const P = '801db464';
 const U = '49289-40';
@@ -55,7 +55,7 @@ const main = async () => {
                 jar: j,
                 encoding: 'binary',
             }, (err, response, body) => {
-                //let title = ic.decode(Buffer(body, 'binary'), "win1251");
+                //let title = ic.decode(Buffer.from(body, 'binary'), "win1251");
                 console.log('mainResponse is ok.')
                 resolve({
                     response,
@@ -136,6 +136,8 @@ const main = async () => {
         for (const [index, url] of level1links.entries()) {
             require('fs').writeFileSync(`./startindex.txt`, +index + startIndex);
             superindex = +index + startIndex;
+            startIndexRecursion = 0;
+            supercounter = 0;
             let level2uniquelinks = new Set();
             let isrepeatedlevel2link = {};
             const l1title = level1titles[index];
@@ -171,7 +173,7 @@ const main = async () => {
                                         : '\x1b[33m%s\x1b[0m',
                                     `- Index ${startIndex+index+1}/${startIndex+level1links.length} fetched ${curURL} with ${response.statusCode}`
                                 )
-                                //const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                                //const title = ic.decode(Buffer.from(body, 'binary'), "win1251");
                                 let redirect
                                 if (
                                     (response.statusCode === 302 || response.statusCode === 301) &&
@@ -207,9 +209,9 @@ const main = async () => {
                         if (status300) {
                             log = {
                                 "Cтатус": level1response.status,
-                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                "Конечный url": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                                "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
+                                "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                "Конечный url": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                                "Title": ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"),
                                 "File": 'data'+(startIndex+index),
                                 "Уровень": "1. разделы"
                             }
@@ -221,9 +223,9 @@ const main = async () => {
                         else if (level1response.status === 404 || level1response.status === 401) {
                             log = {
                                 "Cтатус": level1response.status,
-                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                "Конечный url (если 302 были)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                                "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
+                                "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                "Конечный url (если 302 были)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                                "Title": ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"),
                                 "File": 'data'+(startIndex+index),
                                 "Уровень": "1. разделы"
                             }
@@ -232,9 +234,9 @@ const main = async () => {
                         else if (level1response.status !== 200) {
                             log = {
                                 "Cтатус": level1response.status,
-                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                "Конечный url (если 302 были)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                                "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
+                                "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                "Конечный url (если 302 были)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                                "Title": ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"),
                                 "File": 'data'+(startIndex+index),
                                 "Уровень": "1. разделы"
                             }
@@ -247,9 +249,9 @@ const main = async () => {
                     // в лог ERROR
                     log = {
                         "Ошибка": error,
-                        "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                        "Конечный url (если 302 были)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                        "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
+                        "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                        "Конечный url (если 302 были)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                        "Title": ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"),
                         "File": 'data'+(startIndex+index),
                         "Уровень": "1. разделы"
                     }
@@ -260,9 +262,9 @@ const main = async () => {
                 }
             }
             //убрать
-            //console.log( ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"));
+            //console.log( ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"));
             //console.log(curURL);
-            //console.log(ic.decode(Buffer('' + url, 'binary'), "win1251"));
+            //console.log(ic.decode(Buffer.from('' + url, 'binary'), "win1251"));
             const soup2 = new JSSoup(level1response.body);
             status = level1response.status;
 
@@ -271,9 +273,9 @@ const main = async () => {
                 status = 800
                 // в лог otherDomain
                 log = {
-                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                    "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                    "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
+                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                    "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                    "Title": ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"),
                     "File": 'data'+(startIndex+index),
                     "Уровень": "1. разделы"
                 }
@@ -339,9 +341,9 @@ const main = async () => {
             if(curURL === 'https://its.1c.ru/clip8') {
                 // в лог video
                 log = {
-                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                    "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                    "Title": ic.decode(Buffer('' + level1titles[index], 'binary'), "win1251"),
+                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                    "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                    "Title": ic.decode(Buffer.from('' + level1titles[index], 'binary'), "win1251"),
                     "File": 'data'+(startIndex+index),
                     "Уровень": "1. разделы"
                 }
@@ -365,9 +367,9 @@ const main = async () => {
 
                 // в лог recursion
                 log = {
-                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                    "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                    "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                    "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                    "Title": ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                     "File": 'data'+(startIndex+index),
                     "Уровень": "1. разделы"
                 }
@@ -382,7 +384,7 @@ const main = async () => {
                 let lislis = []
                 lis.forEach((li) => {
                     let qq = li.findAll('li').reduce((accumulator, div) => {
-                        if (div.attrs && div.attrs.class && div.find('a') && ic.decode(Buffer('' + div.find('a').contents[0]._text, 'binary'), "win1251") === "Содержание") {
+                        if (div.attrs && div.attrs.class && div.find('a') && ic.decode(Buffer.from('' + div.find('a').contents[0]._text, 'binary'), "win1251") === "Содержание") {
                             accumulator = [...accumulator, ...div.findAll('li')]
                         }
                         return accumulator
@@ -409,7 +411,7 @@ const main = async () => {
 
             if (pagesCounter === 0) {
                 console.log("Документ записался в корень. Все ок.")
-                pageWithoutContents = ic.decode(Buffer('' + level1response.body, 'binary'), "win1251");
+                pageWithoutContents = ic.decode(Buffer.from('' + level1response.body, 'binary'), "win1251");
             }
             // убрать
             //listLevel2.length = 0;
@@ -472,14 +474,14 @@ const main = async () => {
                             isrepeatedlevel2link[url.split('?')[0]] = {
                                 index: index,
                                 firstData: 'data'+parIndex,
-                                title: ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
-                                url: ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                title: ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                url: ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
                             }
                         } else {
                             console.log("!!!!!!!!!!!! КОПИЯ !!!!!!!!!!!!!!")
                             cohesion[index] = {};
-                            cohesion[index].title = ic.decode(Buffer('' + antidate(level2titles[index+i*size]), 'binary'), "win1251") ;
-                            cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
+                            cohesion[index].title = ic.decode(Buffer.from('' + antidate(level2titles[index+i*size]), 'binary'), "win1251") ;
+                            cohesion[index].link = ic.decode(Buffer.from('' + level2links[index], 'binary'), "win1251");
                             cohesion[index].repeated = isrepeatedlevel2link[url.split('?')[0]] || "repeated";
                             cohesion[index].content ='';
                             cohesion[index].versions = [];
@@ -519,9 +521,9 @@ const main = async () => {
                             if (sta === 302 || sta === 301) {
                                 log = {
                                     "Cтатус": sta,
-                                    "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                    "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
                                     "Конечный url": "301 302 тут не обрабатывается",
-                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                    "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                     "File": 'data'+(startIndex+parIndex),
                                     "Уровень": "2. статьи"
                                 }
@@ -530,8 +532,8 @@ const main = async () => {
                             else if (sta === 404 || sta === 401) {
                                 log = {
                                     "Cтатус": sta,
-                                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                    "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                     "File": 'data'+(startIndex+parIndex),
                                     "Уровень": "2. статьи"
                                 }
@@ -540,8 +542,8 @@ const main = async () => {
                             else if (sta !== 200) {
                                 log = {
                                     "Cтатус": sta,
-                                    "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                    "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                    "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                     "File": 'data'+(startIndex+parIndex),
                                     "Уровень": "2. статьи"
                                 }
@@ -554,8 +556,8 @@ const main = async () => {
                                 sta = 800
                                 // в лог otherDomain
                                 log = {
-                                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                    "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                     "File": 'data'+(startIndex+parIndex),
                                     "Уровень": "2. статьи"
                                 }
@@ -567,9 +569,9 @@ const main = async () => {
                             level2codes.push(sta)
 
                             cohesion[index] = {};
-                            cohesion[index].title = ic.decode(Buffer('' + antidate(level2titles[index+i*size]), 'binary'), "win1251") ;
-                            cohesion[index].link = ic.decode(Buffer('' + level2links[index], 'binary'), "win1251");
-                            cohesion[index].content = ic.decode(Buffer('' + antiImg(antiscript(level2response.body),level2links[index]), 'binary'), "win1251");
+                            cohesion[index].title = ic.decode(Buffer.from('' + antidate(level2titles[index+i*size]), 'binary'), "win1251") ;
+                            cohesion[index].link = ic.decode(Buffer.from('' + level2links[index], 'binary'), "win1251");
+                            cohesion[index].content = ic.decode(Buffer.from('' + antiImg(antiscript(level2response.body),level2links[index]), 'binary'), "win1251");
                             cohesion[index].versions = [];
 
                             cohesion[index].repeated = {
@@ -583,8 +585,8 @@ const main = async () => {
                             if (cohesion[index].content == "") {
                                 log = {
                                     "Ошибка": "Статья пустая ёпта",
-                                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                    "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                     "File": 'data'+(startIndex+parIndex),
                                     "Уровень": "2. Статьи"
                                 }
@@ -594,8 +596,8 @@ const main = async () => {
                             // в лог titleError
                             if (level2titles[index+i*size] === null || level2titles[index+i*size] === undefined || level2titles[index+i*size] == '' || level2titles[index+i*size] === "undefined") {
                                 log = {
-                                    "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                    "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                    "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                    "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                     "File": 'data'+(startIndex+parIndex),
                                     "Уровень": "2. Статьи"
                                 }
@@ -608,8 +610,8 @@ const main = async () => {
                             // в лог ERROR
                             log = {
                                 "Ошибка": error,
-                                "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                "Title": ic.decode(Buffer('' + level2titles[index+i*size], 'binary'), "win1251"),
+                                "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                "Title": ic.decode(Buffer.from('' + level2titles[index+i*size], 'binary'), "win1251"),
                                 "File": 'data'+(startIndex+parIndex),
                                 "Уровень": "2. статьи"
                             }
@@ -654,9 +656,9 @@ const main = async () => {
                         if(level3links.length === 0)
                             cohesion[index].versions.push(
                                 {
-                                    title: ic.decode(Buffer('' + antidate(level2titles[index+i*size]), 'binary'), "win1251"),
-                                    link: ic.decode(Buffer('' + level2links[index], 'binary'), "win1251"),
-                                    content: ic.decode(Buffer('' + antiImg(antiscript(level2response.body),level2links[index]), 'binary'), "win1251"),
+                                    title: ic.decode(Buffer.from('' + antidate(level2titles[index+i*size]), 'binary'), "win1251"),
+                                    link: ic.decode(Buffer.from('' + level2links[index], 'binary'), "win1251"),
+                                    content: ic.decode(Buffer.from('' + antiImg(antiscript(level2response.body),level2links[index]), 'binary'), "win1251"),
                                     status: level2response.status,
                                 }
                             )
@@ -684,7 +686,7 @@ const main = async () => {
                                                 //выводим в консоль инфу со статусом
                                                 console.log(response.statusCode === 200 ? '\x1b[32m%s\x1b[0m' : '\x1b[33m%s\x1b[0m',
                                                     `--- Content ${ind+1}/${level3links.length} fetched ${url} with ${response.statusCode}`)
-                                                const title = ic.decode(Buffer(body, 'binary'), "win1251");
+                                                const title = ic.decode(Buffer.from(body, 'binary'), "win1251");
                                                 resolve({
                                                     response,
                                                     body: title,
@@ -697,9 +699,9 @@ const main = async () => {
                                     if (sta === 302 || sta === 301) {
                                         log = {
                                             "Cтатус": sta,
-                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                                            "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
                                             "Конечный url": "301 302 тут не обрабатывается",
-                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                            "Title": ic.decode(Buffer.from('' + level3titles[ind], 'binary'), "win1251"),
                                             "File": 'data'+(startIndex+parIndex),
                                             "Уровень": "3. версии"
                                         }
@@ -708,8 +710,8 @@ const main = async () => {
                                     else if (sta === 404 || sta === 401) {
                                         log = {
                                             "Cтатус": sta,
-                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                            "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                            "Title": ic.decode(Buffer.from('' + level3titles[ind], 'binary'), "win1251"),
                                             "File": 'data'+(startIndex+parIndex),
                                             "Уровень": "3. версии"
                                         }
@@ -718,8 +720,8 @@ const main = async () => {
                                     else if (sta !== 200) {
                                         log = {
                                             "Cтатус": sta,
-                                            "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                            "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                            "Title": ic.decode(Buffer.from('' + level3titles[ind], 'binary'), "win1251"),
                                             "File": 'data'+(startIndex+parIndex),
                                             "Уровень": "3. версии"
                                         }
@@ -732,8 +734,8 @@ const main = async () => {
                                         sta = 800
                                         // в лог otherDomain
                                         log = {
-                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                            "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                            "Title": ic.decode(Buffer.from('' + level3titles[ind], 'binary'), "win1251"),
                                             "File": 'data'+(startIndex+parIndex),
                                             "Уровень": "3. версии"
                                         }
@@ -745,17 +747,17 @@ const main = async () => {
                                     level3codes.push(sta)
 
                                     cohesion[index].versions.push({
-                                        title: ic.decode(Buffer('' + antidate(level3titles[ind]), 'binary'), "win1251"),
-                                        link: ic.decode(Buffer('' + level3links[ind], 'binary'), "win1251"),
-                                        content: ic.decode(Buffer('' + antiImg(antiscript(level3response.body),level3links[ind]), 'binary'), "win1251"),
+                                        title: ic.decode(Buffer.from('' + antidate(level3titles[ind]), 'binary'), "win1251"),
+                                        link: ic.decode(Buffer.from('' + level3links[ind], 'binary'), "win1251"),
+                                        content: ic.decode(Buffer.from('' + antiImg(antiscript(level3response.body),level3links[ind]), 'binary'), "win1251"),
                                         status: level3response.status,
                                     })
 
                                     // в лог titleError
                                     if (level3titles[ind] === null || level3titles[ind] === undefined || level3titles[ind] == '' || level3titles[ind] === "undefined") {
                                         log = {
-                                            "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                            "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                            "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                            "Title": ic.decode(Buffer.from('' + level3titles[ind], 'binary'), "win1251"),
                                             "File": 'data'+(startIndex+parIndex),
                                             "Уровень": "3. версии"
                                         }
@@ -767,8 +769,8 @@ const main = async () => {
                                     // в лог ERROR
                                     log = {
                                         "Ошибка": error,
-                                        "Первый url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                        "Title": ic.decode(Buffer('' + level3titles[ind], 'binary'), "win1251"),
+                                        "Первый url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                        "Title": ic.decode(Buffer.from('' + level3titles[ind], 'binary'), "win1251"),
                                         "File": 'data'+(startIndex+parIndex),
                                         "Уровень": "3. версии"
                                     }
@@ -787,8 +789,8 @@ const main = async () => {
                             data: ``
                         }
                     const results = {
-                        'title': ic.decode(Buffer('' + antidate(l1title), 'binary'), "win1251"),
-                        'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                        'title': ic.decode(Buffer.from('' + antidate(l1title), 'binary'), "win1251"),
+                        'link': ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
                         'status': status,
                         'pageWithoutContents': antiImg(antiscript(pageWithoutContents),url),
                         'repeated': level2uniquefirstlink.has(level2links[0]),
@@ -799,9 +801,9 @@ const main = async () => {
                     /*     // в лог titleError
                         if (l1title === null || l1title === undefined || l1title == '' || l1title === "undefined") {
                             log = {
-                               "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                               "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                               "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                               "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                               "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                               "Title": ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                                "File": 'data'+(startIndex+index+i*size),
                                "Уровень": "1. разделы"
                            }
@@ -814,8 +816,8 @@ const main = async () => {
                         level2uniquefirstlink.add(level2links[0]);
                         let lnk = level2links[0];
                         repeatingLinks[lnk] = {
-                            linkFirstMention: ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                            titleFirstMention: ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                            linkFirstMention: ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                            titleFirstMention: ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                             data: `./dumps/data${index+i*size}.json`
                         }
                     }
@@ -825,9 +827,9 @@ const main = async () => {
                         /*                // в лог emptyContent
                                        log = {
                                            "Ошибка": "У раздела нет ссылок (статей)? видимо нет",
-                                           "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                           "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                                           "Title": ic.decode(Buffer('' + level1titles[index+i*size], 'binary'), "win1251"),
+                                           "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                           "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                                           "Title": ic.decode(Buffer.from('' + level1titles[index+i*size], 'binary'), "win1251"),
                                            "File": 'data'+(startIndex+index+i*size),
                                            "Уровень": "1. разделы"
                                        }
@@ -854,9 +856,9 @@ const main = async () => {
                     repeatingLinks_ = repeatingLinks[level2links[0]]
                     // в лог repeated
                     log = {
-                        "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                        "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                        "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                        "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                        "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                        "Title": ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                         "File": 'data'+(startIndex+index),
                         'Первая ссылка на этот раздел': repeatingLinks_,
                         "Уровень": "1. разделы"
@@ -871,8 +873,8 @@ const main = async () => {
                         data: ``
                     }
                 const results = {
-                    'title': ic.decode(Buffer('' + antidate(l1title), 'binary'), "win1251"),
-                    'link': ic.decode(Buffer('' + url, 'binary'), "win1251"),
+                    'title': ic.decode(Buffer.from('' + antidate(l1title), 'binary'), "win1251"),
+                    'link': ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
                     'status': status,
                     'pageWithoutContents': antiImg(antiscript(pageWithoutContents),url),
                     'repeated': level2uniquefirstlink.has(level2links[0]),
@@ -883,9 +885,9 @@ const main = async () => {
                 /*     // в лог titleError
                     if (l1title === null || l1title === undefined || l1title == '' || l1title === "undefined") {
                         log = {
-                           "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                           "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                           "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                           "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                           "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                           "Title": ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                            "File": 'data'+(startIndex+index+i*size),
                            "Уровень": "1. разделы"
                        }
@@ -898,8 +900,8 @@ const main = async () => {
                     level2uniquefirstlink.add(level2links[0]);
                     let lnk = level2links[0];
                     repeatingLinks[lnk] = {
-                        linkFirstMention: ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                        titleFirstMention: ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                        linkFirstMention: ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                        titleFirstMention: ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                         data: `./dumps/data${index}.json`
                     }
                 }
@@ -909,9 +911,9 @@ const main = async () => {
                     /*                // в лог emptyContent
                                    log = {
                                        "Ошибка": "У раздела нет ссылок (статей)? видимо нет",
-                                       "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                                       "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                                       "Title": ic.decode(Buffer('' + level1titles[index+i*size], 'binary'), "win1251"),
+                                       "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                                       "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                                       "Title": ic.decode(Buffer.from('' + level1titles[index+i*size], 'binary'), "win1251"),
                                        "File": 'data'+(startIndex+index+i*size),
                                        "Уровень": "1. разделы"
                                    }
@@ -991,9 +993,9 @@ let postpost = async function (lis, count, log) {
                 catch(error) {
                     // в лог recursion
                     log = {
-                        "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                        "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                        "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                        "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                        "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                        "Title": ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                         "File": 'data'+(startIndex+index),
                         "Уровень": "1. разделы",
                         "Error": error
@@ -1046,9 +1048,9 @@ let postpost = async function (lis, count, log) {
                 catch(error) {
                     // в лог recursion
                     log = {
-                        "url": ic.decode(Buffer('' + url, 'binary'), "win1251"),
-                        "Конечный url (для 302)": ic.decode(Buffer('' + curURL, 'binary'), "win1251"),
-                        "Title": ic.decode(Buffer('' + l1title, 'binary'), "win1251"),
+                        "url": ic.decode(Buffer.from('' + url, 'binary'), "win1251"),
+                        "Конечный url (для 302)": ic.decode(Buffer.from('' + curURL, 'binary'), "win1251"),
+                        "Title": ic.decode(Buffer.from('' + l1title, 'binary'), "win1251"),
                         "File": 'data'+(startIndex+index),
                         "Уровень": "1. разделы",
                         "Error": error
@@ -1117,7 +1119,7 @@ var antiImg = (body, link) => {
     let path = lli.slice(ROOT_URL.length+1)
 
     if (path.search(/[а-яА-ЯёЁ]/i) === -1) {
-        path = ic.decode(Buffer('' + path, 'binary'), "win1251")
+        path = ic.decode(Buffer.from('' + path, 'binary'), "win1251")
     }
 
     // ./img/path/imgwithout..?
@@ -1134,7 +1136,7 @@ var antiImg = (body, link) => {
             let imgPath = src.match(rer)[0]
             if(imgPath.indexOf('mc.yandex.ru') !== -1) continue
             if (imgPath.search(/[а-яА-ЯёЁ]/i) === -1) {
-                imgPath = ic.decode(Buffer('' + imgPath, 'binary'), "win1251")
+                imgPath = ic.decode(Buffer.from('' + imgPath, 'binary'), "win1251")
             }
             imgPath = imgPath.slice(1, -1)
             if (imgPath.indexOf('/') === 0) imgPath.slice(1)
@@ -1162,7 +1164,7 @@ var antiImg = (body, link) => {
 
 
 function createImgDirs(start, path){
-    let arr = ic.decode(Buffer(path, 'binary'), "win1251").split("/")
+    let arr = ic.decode(Buffer.from(path, 'binary'), "win1251").split("/")
     let st = start
     let stOld = start;
     let imgName = 'file'

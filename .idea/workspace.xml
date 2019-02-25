@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="349023d5-e553-4b06-8b7f-acc5b62d9139" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/serverimg.js" beforeDir="false" afterPath="$PROJECT_DIR$/serverimg.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -20,7 +19,7 @@
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="235">
-              <caret line="447" column="29" selection-start-line="447" selection-start-column="29" selection-end-line="447" selection-end-column="29" />
+              <caret line="447" column="46" selection-start-line="447" selection-start-column="46" selection-end-line="447" selection-end-column="46" />
             </state>
           </provider>
         </entry>
@@ -56,8 +55,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/serverimg.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="201">
-              <caret line="755" column="9" selection-start-line="755" selection-start-column="9" selection-end-line="755" selection-end-column="9" />
+            <state relative-caret-position="268">
+              <caret line="791" column="112" selection-start-line="791" selection-start-column="112" selection-end-line="791" selection-end-column="112" />
             </state>
           </provider>
         </entry>
@@ -66,7 +65,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>startIndex+</find>
       <find>parIndex</find>
       <find>log(`[${startIndex+index+1}]`);</find>
       <find>parseImg</find>
@@ -94,8 +92,9 @@
       <find>versions</find>
       <find>level3responses</find>
       <find>level3response</find>
-      <find>500</find>
       <find>vers</find>
+      <find>pipe</find>
+      <find>500</find>
     </findStrings>
     <replaceStrings>
       <replace>Buffer.from</replace>
@@ -195,7 +194,7 @@
       <workItem from="1550784304651" duration="142000" />
       <workItem from="1550935450346" duration="3417000" />
       <workItem from="1551032206181" duration="4749000" />
-      <workItem from="1551119495257" duration="4950000" />
+      <workItem from="1551119495257" duration="6824000" />
     </task>
     <task id="LOCAL-00001" summary="asd">
       <created>1550343352384</created>
@@ -208,11 +207,10 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="44448000" />
+    <option name="totallyTimeSpent" value="46322000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17913593" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -226,7 +224,7 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.14842904" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.32936078" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="11" weight="0.32936078" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -292,9 +290,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/startIndexRecursion.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/supercounter.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -305,17 +300,20 @@
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/startIndexRecursion.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/server.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="235">
-          <caret line="447" column="29" selection-start-line="447" selection-start-column="29" selection-end-line="447" selection-end-column="29" />
+          <caret line="447" column="46" selection-start-line="447" selection-start-column="46" selection-end-line="447" selection-end-column="46" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/serverimg.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="201">
-          <caret line="755" column="9" selection-start-line="755" selection-start-column="9" selection-end-line="755" selection-end-column="9" />
+        <state relative-caret-position="268">
+          <caret line="791" column="112" selection-start-line="791" selection-start-column="112" selection-end-line="791" selection-end-column="112" />
         </state>
       </provider>
     </entry>

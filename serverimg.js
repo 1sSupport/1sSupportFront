@@ -753,7 +753,7 @@ var parseImg = async (soup, link) => {
         //if(~src.indexOf(";")) continue;
         //if(~path.indexOf("http")) continue;
         //path = ic.decode(Buffer('' + path, 'binary'), "win1251");
-        let {imgPath, imgName} = createImgDirs("./img/"+path, src)
+       // let {imgPath, imgName} = createImgDirs("./img/"+path, src)
         let llimg = lli+src
         console.log(llimg)
         try {
@@ -774,29 +774,22 @@ var parseImg = async (soup, link) => {
                         reject(err)
                         return
                     }
-                    console.log(`./img/${path}${imgName}`)
-                        if(~imgName.indexOf("."))
-                            console.error(imgName.lastIndexOf('.'))
                         if(!setllimg.has(llimg)) {
+                            console.log("!!!!!!!!!!")
+                            console.log(llimg)
                             setllimg.add(llimg);
-                            console.log("!!!!!!!!!!")/*
-                            if (!(~((imgName.slice(-4)).indexOf(".")))) {
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.warn(`./img/${superindex}/${supercounter++}${imgName.slice(-4)}`)
-                                console.warn(imgName)
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                console.log("!!!!!!!!!!")
-                                return;
-                            }*/
-                            if(response.statusCode === 200 && ~((imgName.slice(-4)).indexOf(".")))
-                                request(llimg).pipe(require('fs').createWriteStream(`./img/${superindex}/${supercounter++}${imgName.slice(-4)}`))
+                            console.log("!!!!!!!!!!")
+                            if(response.statusCode === 200){
+                                let png = '';
+                                request
+                                    .get(llimg)
+                                    .on('response', function(response) {
+                                        console.log(response.statusCode) // 200
+                                        console.log(response.headers['content-type']) // 'image/png'
+                                        png = response.headers['content-type'].slice(-3) // 'image/png'
+                                    })
+                                    .pipe(require('fs').createWriteStream(`./img/${superindex}/${supercounter++}.${png}`))
+                            }
                         }
                             //request(llimg).pipe(require('fs').createWriteStream(`./img/${ic.decode(Buffer('' + path, 'binary'), "win1251")}${imgPath}${imgName}`))
                     //выводим в консоль инфу со статусом

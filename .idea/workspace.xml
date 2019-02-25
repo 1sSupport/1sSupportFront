@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="349023d5-e553-4b06-8b7f-acc5b62d9139" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/serverimg.js" beforeDir="false" afterPath="$PROJECT_DIR$/serverimg.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/startindex.txt" beforeDir="false" afterPath="$PROJECT_DIR$/startindex.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/supercounter.txt" beforeDir="false" afterPath="$PROJECT_DIR$/supercounter.txt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -19,7 +16,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="235">
@@ -56,11 +53,11 @@
           <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/serverimg.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="787">
-              <caret line="813" column="9" selection-start-line="813" selection-start-column="9" selection-end-line="813" selection-end-column="9" />
+            <state relative-caret-position="201">
+              <caret line="755" column="9" selection-start-line="755" selection-start-column="9" selection-end-line="755" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -83,7 +80,6 @@
       <find>main(</find>
       <find>Re</find>
       <find>supercounter.</find>
-      <find>500</find>
       <find>e('fs').readFile</find>
       <find>Buffer</find>
       <find>LINKS</find>
@@ -95,10 +91,11 @@
       <find>startIndexRecursion</find>
       <find>supercounter</find>
       <find>ОШБИКА КАРТИНКИ</find>
-      <find>vers</find>
       <find>versions</find>
       <find>level3responses</find>
       <find>level3response</find>
+      <find>500</find>
+      <find>vers</find>
     </findStrings>
     <replaceStrings>
       <replace>Buffer.from</replace>
@@ -120,8 +117,8 @@
         <option value="$PROJECT_DIR$/src/components/ArticlePage.vue" />
         <option value="$PROJECT_DIR$/startindex.txt" />
         <option value="$PROJECT_DIR$/supercounter.txt" />
-        <option value="$PROJECT_DIR$/serverimg.js" />
         <option value="$PROJECT_DIR$/server.js" />
+        <option value="$PROJECT_DIR$/serverimg.js" />
       </list>
     </option>
   </component>
@@ -198,7 +195,7 @@
       <workItem from="1550784304651" duration="142000" />
       <workItem from="1550935450346" duration="3417000" />
       <workItem from="1551032206181" duration="4749000" />
-      <workItem from="1551119495257" duration="3144000" />
+      <workItem from="1551119495257" duration="4950000" />
     </task>
     <task id="LOCAL-00001" summary="asd">
       <created>1550343352384</created>
@@ -211,7 +208,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="42642000" />
+    <option name="totallyTimeSpent" value="44448000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -305,13 +302,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/serverimg.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="787">
-          <caret line="813" column="9" selection-start-line="813" selection-start-column="9" selection-end-line="813" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -319,6 +309,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="235">
           <caret line="447" column="29" selection-start-line="447" selection-start-column="29" selection-end-line="447" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/serverimg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="201">
+          <caret line="755" column="9" selection-start-line="755" selection-start-column="9" selection-end-line="755" selection-end-column="9" />
         </state>
       </provider>
     </entry>

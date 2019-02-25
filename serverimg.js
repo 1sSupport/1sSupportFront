@@ -109,6 +109,7 @@ const main = async () => {
 
     for (const [index, url] of level1links.entries()) {
         superindex = index + startIndex;
+        supercounter = 0;
         let level2uniquelinks = new Set();
         let isrepeatedlevel2link = {};
         const l1title = level1titles[index];

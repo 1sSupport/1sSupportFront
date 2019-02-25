@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 // Взять из кукисов
-const PHPSESSID = '0af33kpkvf6rk1hhec5fu08rp6'
+const PHPSESSID = '2np7m9818e4dc6vtv37nkl4922'
 const ROOT_URL = 'https://its.1c.ru';
 const P = '801db464';
 const U = '49289-40';
@@ -445,7 +445,7 @@ const main = async () => {
             const sets = [];
 
             if(level2links[0] && !level2uniquefirstlink.has(level2links[0])) {
-                let size = 500; //размер подмассива
+                let size = 20; //размер подмассива
                 const amountOfLinks=level2links.length;
                 let sublevel2links = []; //массив в который будет выведен результат.
                 for (let i = 0; i <Math.ceil(level2links.length/size); i++){
@@ -749,7 +749,7 @@ const main = async () => {
                                     cohesion[index].versions.push({
                                         title: ic.decode(Buffer.from('' + antidate(level3titles[ind]), 'binary'), "win1251"),
                                         link: ic.decode(Buffer.from('' + level3links[ind], 'binary'), "win1251"),
-                                        content: ic.decode(Buffer.from('' + antiImg(antiscript(level3response.body),level3links[ind]), 'binary'), "win1251"),
+                                        content: antiImg(antiscript(level3response.body),level3links[ind]),
                                         status: level3response.status,
                                     })
 
@@ -1146,7 +1146,7 @@ var antiImg = (body, link) => {
 
             let {imgPathhh, imgName} = createImgDirs("./img/"+path, src)
 
-            const newPath = `src="http://media.4buttons.ru/img/${superindex}/${supercounter++}${imgName.slice(-4)}`
+            const newPath = `src="http://media.4buttons.ru/img/${superindex}/${supercounter++}${imgName.slice(-4)}"`
             if(!(supercounter%500)) require('fs').writeFileSync(`./supercounter.txt`, +supercounter);
             const normSrc = newPath;
            // const normSrc = `src="http://media.4buttons.ru/img/${path}${imgPath}"`;

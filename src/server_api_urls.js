@@ -1,5 +1,5 @@
-//export const ServerAPIDomain = "https://api.4buttons.ru/1c/v0.1";
-export const ServerAPIDomain = "http://localhost:10000";
+export const ServerAPIDomain = "https://api.4buttons.ru/1c/v0.1";
+//export const ServerAPIDomain = "http://localhost:10000";
 
 export const ServerAPIUrls = Object.freeze({
     SURPRISE: ServerAPIDomain + "/server_infos/surprise",

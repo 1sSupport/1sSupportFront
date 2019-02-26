@@ -24,7 +24,7 @@ export default new Router({
       ]
     },
     {
-      path: 'article/:articleId:query',
+      path: '/articles/:articleId',
       component: ArticlePage,
       name: 'ArticlePage',
       props: true

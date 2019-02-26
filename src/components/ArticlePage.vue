@@ -92,10 +92,6 @@ export default {
     articleId: {
       required: true,
       type: Number
-    },
-    query: {
-      required: true,
-      type: String
     }
   },
   data() {
@@ -123,7 +119,9 @@ export default {
     }
   },
   methods: {
-    getArticle: async function(id, query) {
+
+    getArticle: async function(id) {
+      console.log(localStorage.token)
       let axiosConfig = {
         method: "get",
         url: ServerAPIUrls.GET_ARTICLE + "/" + id,
@@ -158,7 +156,8 @@ export default {
   },
   mounted() {
     (async () => {
-      this.article = await this.getArticle(this.articleId, this.query);
+      this.token = localStorage.token
+      this.article = await this.getArticle(this.articleId);
     })()
   },
   // отправить оценку на сервер после закрытия страницы

@@ -23,7 +23,7 @@
                   append-icon="null"
                   :menu-props="{ overflowY: false}"
                 >
-                  <template slot="item" slot-scope="{ index, item, parent }">
+                  <template slot="item" slot-scope="{ index, item }">
                     <v-list-tile-content>{{ item }}</v-list-tile-content>
                   </template>
                 </v-combobox>

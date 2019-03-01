@@ -5,6 +5,7 @@
     <not-found-message v-if="noDataInResponse"/>
     <search-result
       :searchResponse="searchRequestResponse"
+      :allCount="totalCount"
       :lastQuery="lastQuery"/>
     <modal-component/>
 
@@ -30,6 +31,7 @@ export default {
       token: "",
       sessionId: "",
       searchRequestResponse: [],
+      totalCount: 0,
       lastQuery: "",
       noDataInResponse: false,
       articlesMarks: []
@@ -61,7 +63,9 @@ export default {
     },
     searchHandler: async function(payload) {
       this.lastQuery = payload
-      this.searchRequestResponse = await this.getArticles(payload, this.sessionId)
+      let data = await this.getArticles(payload, this.sessionId)
+      this.searchRequestResponse = data.previews
+      this.totalCount = data.allCount
     },
     getMarks: async function(token) {
       let axiosConfig = {

@@ -2,7 +2,7 @@
   <v-container>
     <v-layout row>
       <v-flex xs12>
-        <v-card v-if="searchResponse != false" flat class="text-xs-left">Результатов найдено: {{ searchResponse.length }}</v-card>
+        <v-card v-if="searchResponse != false" flat class="text-xs-left">Результатов найдено: {{ allCount }}</v-card>
 
         <v-card flat max-width="90%">
           <v-list three-line>
@@ -44,6 +44,10 @@ export default {
     searchResponse: {
       required: false,
       type: Array
+    },
+    allCount:{
+      required: false,
+      type: 0
     }
   },
   data() {

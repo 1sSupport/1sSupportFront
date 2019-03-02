@@ -7,8 +7,8 @@ export const ServerAPIUrls = Object.freeze({
     LOGOUT: ServerAPIDomain + "/tokens/logout",
     GET_SUPPORT_MESSAGES_TITLES: ServerAPIDomain + "/support_questions/titles",
     CREATE_SUPPORT_MESSAGES: ServerAPIDomain + "/support_questions",
+    GET_SEARCH: ServerAPIDomain + "/search",
+    GET_POPULAR_SEARCH: ServerAPIDomain + "/search/popular",
     GET_ARTICLE: ServerAPIDomain + "/articles",
-    GET_ARTICLES_PREVIEWS: ServerAPIDomain + "/articles/previews",
-    GET_POPULAR_ARTICLES: ServerAPIDomain + "/articles/popular",
     SET_ARTICLES_MARKS: ServerAPIDomain + "/articles/marks"
 });

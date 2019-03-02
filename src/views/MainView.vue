@@ -48,12 +48,12 @@ export default {
     getArticles: async function(query, sessionId) {
       let axiosConfig = {
         method: "get",
-        url: ServerAPIUrls.GET_ARTICLES_PREVIEWS,
+        url: ServerAPIUrls.GET_SEARCH,
         headers: {
           "Authorization": "Bearer " + this.token
         },
         params: {
-          "query": query
+          "text": query
         }
       }
       var response = await axios(axiosConfig)
@@ -70,7 +70,7 @@ export default {
     getMarks: async function(token) {
       let axiosConfig = {
         method: "get",
-        url: ServerAPIUrls.GET_POPULAR_ARTICLES,
+        url: ServerAPIUrls.GET_POPULAR_SEARCH,
         headers: {
           Authorization: "Bearer " + this.token
         },
